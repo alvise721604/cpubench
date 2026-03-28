@@ -147,8 +147,8 @@ class PiCalculatorWindow(QWidget):
                 duration = time.time() - start_time
 
             if algorithm == "Riemann sinx/x Integral":
-                print(f"-> Calcolo con metodo Integrale sin(x)/x VECTORIZED: limite={int(self.entry_iter.text())}, step={float(self.entry_step.text())}")
                 if advanced_mode:
+                    print(f"-> Calcolo con metodo Integrale sin(x)/x VETTORIZZATO: limite={int(self.entry_iter.text())}, step={float(self.entry_step.text())}")
                     duration, result = calc_vec.riemann_sinx_integral_vectorized(
                         limit=int(self.entry_iter.text()),
                         step=float(self.entry_step.text()),
