@@ -39,6 +39,8 @@ class PiCalculatorWindow(QWidget):
         layout = QGridLayout()
         self.setLayout(layout)
 
+        self.label_copyright = QLabel("(C) Alvise Dorigo)")
+
         self.advanced_check = QCheckBox("Usa Numpy/Vettorizzato")
         self.advanced_check.setEnabled(False)
 
@@ -73,6 +75,9 @@ class PiCalculatorWindow(QWidget):
         layout.addWidget(self.result_label, 5, 0, 1, 2)
         layout.addWidget(self.timer_label, 6, 0, 1, 2)
 
+        layout.addWidget(self.label_copyright, 99, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom)
+        layout.setRowStretch(98, 1)
+
         layout.setColumnStretch(1, 1)
         layout.setRowStretch(4, 1)
 
@@ -80,6 +85,7 @@ class PiCalculatorWindow(QWidget):
         self.on_algo_choice(self.algo_choice.currentText())
 
         self.resize_and_center()
+        self.setMinimumSize(350, 300)
 
     def resize_and_center(self):
         font_metrics = QFontMetrics(self.font())
@@ -197,7 +203,25 @@ class PiCalculatorWindow(QWidget):
 
 
 if __name__ == "__main__":
+
+    #import sys
+    import signal
+
+    #from PyQt6.QtCore import QTimer
+    #from PyQt6.QtWidgets import QApplication
+
+    #app = QApplication(sys.argv)
+
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+    #timer = QTimer()
+    #timer.start(200)
+    #timer.timeout.connect(lambda: None)
+
+    #sys.exit(app.exec())
+
     app = QApplication(sys.argv)
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
     window = PiCalculatorWindow()
     window.show()
     sys.exit(app.exec())
