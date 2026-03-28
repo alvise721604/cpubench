@@ -136,7 +136,7 @@ class PiCalculatorWindow(QWidget):
                 result *= 4
                 duration = time.time() - start_time
 
-            elif algorithm == "Euler":
+            if algorithm == "Euler":
                 print(f"-> Calcolo con metodo Euler: iterazioni={iterations}")
                 result = 0.0
                 start_time = time.time()
@@ -146,21 +146,21 @@ class PiCalculatorWindow(QWidget):
                 result = np.sqrt(result)
                 duration = time.time() - start_time
 
-            elif algorithm == "Riemann sinx/x Integral":
-                print(f"-> Calcolo con metodo Integrale xin(x)/x VECTORIZED: limite={int(self.entry_iter.text())}, step={float(self.entry_step.text())}")
+            if algorithm == "Riemann sinx/x Integral":
+                print(f"-> Calcolo con metodo Integrale sin(x)/x VECTORIZED: limite={int(self.entry_iter.text())}, step={float(self.entry_step.text())}")
                 if advanced_mode:
                     duration, result = calc_vec.riemann_sinx_integral_vectorized(
                         limit=int(self.entry_iter.text()),
                         step=float(self.entry_step.text()),
                     )
                 else:
-                    print(f"-> Calcolo con metodo Integrale xin(x)/x NORMALE: limite={int(self.entry_iter.text())}, step={float(self.entry_step.text())}")
+                    print(f"-> Calcolo con metodo Integrale sin(x)/x NORMALE: limite={int(self.entry_iter.text())}, step={float(self.entry_step.text())}")
                     duration, result = calc.riemann_sinx_integral(
                         iterations=int(int(self.entry_iter.text()) / step),
                         step=float(self.entry_step.text()),
                     )
 
-            elif algorithm == "Gaussian Integral":
+            if algorithm == "Gaussian Integral":
                 if not advanced_mode:
                     # Mantengo la logica del tuo sorgente così com'è
                     print(f"-> Calcolo con metodo Integrale Gaussiano NORMALE: limite={int(self.entry_iter.text())}, step={float(self.entry_step.text())}")
