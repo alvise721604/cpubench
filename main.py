@@ -204,21 +204,9 @@ class PiCalculatorWindow(QWidget):
 
 if __name__ == "__main__":
 
-    #import sys
     import signal
-
-    #from PyQt6.QtCore import QTimer
-    #from PyQt6.QtWidgets import QApplication
-
-    #app = QApplication(sys.argv)
-
+    
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-
-    #timer = QTimer()
-    #timer.start(200)
-    #timer.timeout.connect(lambda: None)
-
-    #sys.exit(app.exec())
 
     app = QApplication(sys.argv)
     signal.signal(signal.SIGINT, signal.SIG_DFL)
