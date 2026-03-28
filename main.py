@@ -174,10 +174,6 @@ class PiCalculatorWindow(QWidget):
                         limit=int(self.entry_iter.text()),
                         step=float(self.entry_step.text()),
                     )
-            else:
-                self.result_label.setText("Errore: algoritmo non riconosciuto")
-                return
-
             print(f"\tRisultato: {result:.5f}")
             print(f"\tTempo: {duration:.6f} secondi")
 
