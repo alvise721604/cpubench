@@ -1,6 +1,7 @@
 # pycpubench
+Required python modules:
 
-ciao
-ciao
+- numpy
+- pyqt6
 
-
+Tested with python3.14
