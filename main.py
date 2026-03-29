@@ -18,7 +18,6 @@ from PyQt6.QtWidgets import (
 
 import calc
 import calc_vec
-import calc_mps
 
 #
 #
@@ -36,9 +35,8 @@ class PiCalculatorWindow(QWidget):
         self.engine_choices = [
             "CPU Normal",
             "CPU Numpy Vectorized",
-            "GPU",
+            #"GPU",
         ]
-
         self.init_ui()
 
     #_______________________________________________________________________
@@ -101,6 +99,14 @@ class PiCalculatorWindow(QWidget):
         self.setMinimumSize(350, 300)
         self.result_label.setText("Risultato: ---")
         self.timer_label.setText("Durata: ---")
+
+        self.entry_step.setEnabled(False)
+        self.engine_choice.setEnabled(False)
+        self.label_iter.setText("Inserisci il numero di iterazioni:")
+        self.entry_iter.setText("50000000")
+        self.entry_step.setText("0.001")
+        self.algo_choice.setCurrentIndex( 0 )
+        self.engine_choice.setCurrentIndex( 0 )
 
     #_______________________________________________________________________
     def resize_and_center(self):
