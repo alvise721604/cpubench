@@ -180,7 +180,7 @@ class PiCalculatorWindow(QWidget):
         self.result_label = QLabel("")
         self.timer_label = QLabel("")
 
-        self.stop_button = QPushButton("Stop")
+        self.stop_button = QPushButton("Stop (non per Integrals)")
         self.stop_button.setEnabled(False)      
         self.stop_button.clicked.connect(self.on_stop_button_click)
 
@@ -214,8 +214,8 @@ class PiCalculatorWindow(QWidget):
 
         self.resize_and_center()
         self.setMinimumSize(350, 300)
-        self.result_label.setText("Risultato: ---")
-        self.timer_label.setText("Durata: ---")
+        self.result_label.setText("Risultato:   ---")
+        self.timer_label.setText("Durata:   ---")
 
     #_______________________________________________________________________
     def resize_and_center(self):
@@ -249,7 +249,7 @@ class PiCalculatorWindow(QWidget):
             iterations = int(self.entry_iter.text())
             if iterations < 1:
                 self.result_label.setText("Errore: iterazioni deve essere almeno 1")
-                self.timer_label.setText("Durata: ---")
+                self.timer_label.setText("Durata:   ---")
                 self.calculate_button.setEnabled(True)
                 self.reset_button.setEnabled(True)
                 self.stop_button.setEnabled(False)
@@ -271,7 +271,7 @@ class PiCalculatorWindow(QWidget):
 
             if step <= 0:
                 self.result_label.setText("Errore: lo step non può essere zero o negativo")
-                self.timer_label.setText("Durata: ---")
+                self.timer_label.setText("Durata:   ---")
                 self.calculate_button.setEnabled(True)
                 self.reset_button.setEnabled(True)
                 self.stop_button.setEnabled(False)
@@ -293,7 +293,7 @@ class PiCalculatorWindow(QWidget):
 
         except ValueError as e:
             self.result_label.setText(f"Errore: {str(e)}")
-            self.timer_label.setText("Durata: ---")
+            self.timer_label.setText("Durata:   ---")
             self.calculate_button.setEnabled(True)
             self.reset_button.setEnabled(True)
             self.stop_button.setEnabled(False)
@@ -316,7 +316,7 @@ class PiCalculatorWindow(QWidget):
     #_______________________________________________________________________
     def on_calculation_error(self, message: str):
         self.result_label.setText(f"Errore: {message}")
-        self.timer_label.setText("Durata: ---")
+        self.timer_label.setText("Durata:   ---")
         self.calculate_button.setEnabled(True)
         self.reset_button.setEnabled(True)
         self.stop_button.setEnabled(False)
@@ -333,7 +333,7 @@ class PiCalculatorWindow(QWidget):
     #_______________________________________________________________________
     def on_calculation_stopped(self):
         self.result_label.setText("Risultato: calcolo interrotto")
-        self.timer_label.setText("Durata: ---")
+        self.timer_label.setText("Durata:   ---")
         self.calculate_button.setEnabled(True)
         self.reset_button.setEnabled(True)
         self.stop_button.setEnabled(False)
@@ -352,8 +352,15 @@ class PiCalculatorWindow(QWidget):
 
     #_______________________________________________________________________
     def on_reset_button_click(self):
-        self.result_label.setText("Risultato: ---")
-        self.timer_label.setText("Durata: ---")
+        self.entry_step.setEnabled(False)
+        self.engine_choice.setEnabled(False)
+        self.label_iter.setText("Inserisci il numero di iterazioni:")
+        self.entry_iter.setText("50000000")
+        self.entry_step.setText("0.001")
+        self.algo_choice.setCurrentIndex( 0 )
+        self.engine_choice.setCurrentIndex( 0 )
+        self.result_label.setText("Risultato:   ---")
+        self.timer_label.setText("Durata:   ---")
 
 
 if __name__ == "__main__":
