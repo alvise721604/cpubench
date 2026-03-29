@@ -20,7 +20,9 @@ import calc
 import calc_vec
 import calc_mps
 
-
+#
+#
+#
 class PiCalculatorWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -39,6 +41,7 @@ class PiCalculatorWindow(QWidget):
 
         self.init_ui()
 
+    #_______________________________________________________________________
     def init_ui(self):
         self.setWindowTitle(self.title)
 
@@ -75,14 +78,14 @@ class PiCalculatorWindow(QWidget):
         self.calculate_button = QPushButton("Calcola")
         self.calculate_button.clicked.connect(self.on_calculate_button_click)
 
+        self.reset_button = QPushButton("Reset")
+        self.reset_button.clicked.connect(self.on_reset_button_click)
+
         self.result_label = QLabel("")
         self.timer_label = QLabel("")
 
         layout.addWidget(self.algo_choice, 0, 0, 1, 2)
         layout.addWidget(self.engine_choice, 1, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignLeft)
-        #layout.addWidget(self.advanced_check, 1, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignLeft)
-        #layout.addWidget(self.gpu_check, 2, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignLeft)
-        
 
         layout.addWidget(self.label_iter, 2, 0, alignment=Qt.AlignmentFlag.AlignRight)
         layout.addWidget(self.entry_iter, 2, 1)
@@ -90,7 +93,8 @@ class PiCalculatorWindow(QWidget):
         layout.addWidget(self.label_step, 3, 0, alignment=Qt.AlignmentFlag.AlignRight)
         layout.addWidget(self.entry_step, 3, 1)
 
-        layout.addWidget(self.calculate_button, 4, 0, 1, 2)
+        layout.addWidget(self.calculate_button, 4, 0, 1, 1)
+        layout.addWidget(self.reset_button, 4, 1, 1, 1)
         layout.addWidget(self.result_label, 5, 0, 1, 2)
         layout.addWidget(self.timer_label, 6, 0, 1, 2)
 
@@ -106,6 +110,7 @@ class PiCalculatorWindow(QWidget):
         self.resize_and_center()
         self.setMinimumSize(350, 300)
 
+    #_______________________________________________________________________
     def resize_and_center(self):
         font_metrics = QFontMetrics(self.font())
         title_width = font_metrics.horizontalAdvance(self.title) + 5
@@ -121,9 +126,11 @@ class PiCalculatorWindow(QWidget):
 
         self.setGeometry(center_x, center_y, window_width, window_height)
 
+    #_______________________________________________________________________
     def show_warning(self, title: str, text: str):
         QMessageBox.warning(self, title, text)
 
+    #_______________________________________________________________________
     def on_calculate_button_click(self):
         try:
             iterations = int(self.entry_iter.text())
@@ -212,30 +219,33 @@ class PiCalculatorWindow(QWidget):
         except ValueError as e:
             self.result_label.setText(f"Errore: {str(e)}")
 
+    #_______________________________________________________________________
     def on_algo_choice(self, selected_algorithm: str):
         if selected_algorithm in ("Leibniz", "Euler"):
             self.entry_step.setEnabled(False)
             self.engine_choice.setEnabled(False)
             #self.gpu_check.setEnabled(False)
             self.label_iter.setText("Inserisci il numero di iterazioni:")
-            self.entry_iter.setText("10000")
+            #self.entry_iter.setText("50000000")
         else:
             self.entry_step.setEnabled(True)
             self.engine_choice.setEnabled(True)
             #self.gpu_check.setEnabled(True)
             self.label_iter.setText("Inserisci l'estremo d'integrazione")
-            self.entry_iter.setText("10000")
+            #self.entry_iter.setText("100000")
 
-    #def on_engine_change(self):
+    #_______________________________________________________________________
+    def on_reset_button_click(self):
+        pass
     #    if self.gpu_check.isChecked() == True:
     #        self.advanced_check.setChecked( False )
 
+#
+#
+#
 if __name__ == "__main__":
-
     import signal
-    
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-
     app = QApplication(sys.argv)
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     window = PiCalculatorWindow()
