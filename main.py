@@ -18,6 +18,7 @@ from PyQt6.QtWidgets import (
 
 import calc
 import calc_vec
+import calc_mps
 
 
 class PiCalculatorWindow(QWidget):
@@ -30,6 +31,11 @@ class PiCalculatorWindow(QWidget):
             "Riemann sinx/x Integral",
             "Gaussian Integral",
         ]
+        self.engine_choices = [
+            "CPU Normal",
+            "CPU Numpy Vectorized",
+            "GPU",
+        ]
 
         self.init_ui()
 
@@ -41,12 +47,22 @@ class PiCalculatorWindow(QWidget):
 
         self.label_copyright = QLabel("(C) Alvise Dorigo)")
 
-        self.advanced_check = QCheckBox("Usa Numpy/Vettorizzato")
-        self.advanced_check.setEnabled(False)
+        #self.advanced_check = QCheckBox("Usa Numpy/Vettorizzato")
+        #self.advanced_check.setEnabled(False)
+        #self.advanced_check.stateChanged.connect(self.on_advanced_check_change)
+
+        #self.gpu_check = QCheckBox("Usa GPU (Torch)")
+        #self.gpu_check.setEnabled(False)
+        #self.gpu_check.stateChanged.connect(self.on_gpu_check_change)
 
         self.algo_choice = QComboBox()
         self.algo_choice.addItems(self.algo_choices)
         self.algo_choice.currentTextChanged.connect(self.on_algo_choice)
+
+        self.engine_choice = QComboBox()
+        self.engine_choice.addItems(self.engine_choices)
+        #self.engine_choice.currentTextChanged.connect(self.on_engine_choice)
+
 
         self.label_iter = QLabel("Inserisci il numero di iterazioni:")
         self.entry_iter = QLineEdit()
@@ -63,7 +79,10 @@ class PiCalculatorWindow(QWidget):
         self.timer_label = QLabel("")
 
         layout.addWidget(self.algo_choice, 0, 0, 1, 2)
-        layout.addWidget(self.advanced_check, 1, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignLeft)
+        layout.addWidget(self.engine_choice, 1, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignLeft)
+        #layout.addWidget(self.advanced_check, 1, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignLeft)
+        #layout.addWidget(self.gpu_check, 2, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignLeft)
+        
 
         layout.addWidget(self.label_iter, 2, 0, alignment=Qt.AlignmentFlag.AlignRight)
         layout.addWidget(self.entry_iter, 2, 1)
@@ -130,8 +149,9 @@ class PiCalculatorWindow(QWidget):
                 self.result_label.setText("Errore: lo step non può essere zero o negativo")
                 return
 
+            engine = self.engine_choice.currentText()
             algorithm = self.algo_choice.currentText()
-            advanced_mode = self.advanced_check.isChecked()
+            #advanced_mode = self.advanced_check.isChecked()
 
             if algorithm == "Leibniz":
                 print(f"-> Calcolo con metodo Leibniz: iterazioni={iterations}")
@@ -153,13 +173,15 @@ class PiCalculatorWindow(QWidget):
                 duration = time.time() - start_time
 
             if algorithm == "Riemann sinx/x Integral":
-                if advanced_mode:
+                if engine == "CPU Numpy Vectorized":
+                    import calc_vec
                     print(f"-> Calcolo con metodo Integrale sin(x)/x VETTORIZZATO: limite={int(self.entry_iter.text())}, step={float(self.entry_step.text())}")
                     duration, result = calc_vec.riemann_sinx_integral_vectorized(
                         limit=int(self.entry_iter.text()),
                         step=float(self.entry_step.text()),
                     )
                 else:
+                    import calc
                     print(f"-> Calcolo con metodo Integrale sin(x)/x NORMALE: limite={int(self.entry_iter.text())}, step={float(self.entry_step.text())}")
                     duration, result = calc.riemann_sinx_integral(
                         iterations=int(int(self.entry_iter.text()) / step),
@@ -167,14 +189,15 @@ class PiCalculatorWindow(QWidget):
                     )
 
             if algorithm == "Gaussian Integral":
-                if not advanced_mode:
-                    # Mantengo la logica del tuo sorgente così com'è
+                if engine == "CPU Normal":
+                    import calc
                     print(f"-> Calcolo con metodo Integrale Gaussiano NORMALE: limite={int(self.entry_iter.text())}, step={float(self.entry_step.text())}")
                     duration, result = calc.gaussian_integral(
                         iterations=int(int(self.entry_iter.text()) / step),
                         step=float(self.entry_step.text()),
                     )
                 else:
+                    import calc_vec
                     print(f"-> Calcolo con metodo Integrale Gaussiano VETTORIZZATO: limite={int(self.entry_iter.text())}, step={float(self.entry_step.text())}")
                     duration, result = calc_vec.gaussian_integral_numpy_vectorized(
                         limit=int(self.entry_iter.text()),
@@ -192,15 +215,20 @@ class PiCalculatorWindow(QWidget):
     def on_algo_choice(self, selected_algorithm: str):
         if selected_algorithm in ("Leibniz", "Euler"):
             self.entry_step.setEnabled(False)
-            self.advanced_check.setEnabled(False)
+            self.engine_choice.setEnabled(False)
+            #self.gpu_check.setEnabled(False)
             self.label_iter.setText("Inserisci il numero di iterazioni:")
             self.entry_iter.setText("10000")
         else:
             self.entry_step.setEnabled(True)
-            self.advanced_check.setEnabled(True)
+            self.engine_choice.setEnabled(True)
+            #self.gpu_check.setEnabled(True)
             self.label_iter.setText("Inserisci l'estremo d'integrazione")
             self.entry_iter.setText("10000")
 
+    #def on_engine_change(self):
+    #    if self.gpu_check.isChecked() == True:
+    #        self.advanced_check.setChecked( False )
 
 if __name__ == "__main__":
 
