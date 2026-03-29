@@ -20,7 +20,7 @@ import calc
 import calc_vec
 
 #
-#
+# 
 #
 class PiCalculatorWindow(QWidget):
     def __init__(self):
