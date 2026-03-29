@@ -26,7 +26,7 @@ import calc_mps
 class PiCalculatorWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.title = "Calcolo di PI-Greco con vari metodi"
+        self.title = "Calcolo di π con vari metodi"
         self.algo_choices = [
             "Leibniz",
             "Euler",
@@ -50,22 +50,12 @@ class PiCalculatorWindow(QWidget):
 
         self.label_copyright = QLabel("(C) Alvise Dorigo)")
 
-        #self.advanced_check = QCheckBox("Usa Numpy/Vettorizzato")
-        #self.advanced_check.setEnabled(False)
-        #self.advanced_check.stateChanged.connect(self.on_advanced_check_change)
-
-        #self.gpu_check = QCheckBox("Usa GPU (Torch)")
-        #self.gpu_check.setEnabled(False)
-        #self.gpu_check.stateChanged.connect(self.on_gpu_check_change)
-
         self.algo_choice = QComboBox()
         self.algo_choice.addItems(self.algo_choices)
         self.algo_choice.currentTextChanged.connect(self.on_algo_choice)
 
         self.engine_choice = QComboBox()
         self.engine_choice.addItems(self.engine_choices)
-        #self.engine_choice.currentTextChanged.connect(self.on_engine_choice)
-
 
         self.label_iter = QLabel("Inserisci il numero di iterazioni:")
         self.entry_iter = QLineEdit()
@@ -109,6 +99,8 @@ class PiCalculatorWindow(QWidget):
 
         self.resize_and_center()
         self.setMinimumSize(350, 300)
+        self.result_label.setText("Risultato: ---")
+        self.timer_label.setText("Durata: ---")
 
     #_______________________________________________________________________
     def resize_and_center(self):
@@ -132,6 +124,7 @@ class PiCalculatorWindow(QWidget):
 
     #_______________________________________________________________________
     def on_calculate_button_click(self):
+        
         try:
             iterations = int(self.entry_iter.text())
             if iterations < 1:
@@ -236,9 +229,12 @@ class PiCalculatorWindow(QWidget):
 
     #_______________________________________________________________________
     def on_reset_button_click(self):
-        pass
-    #    if self.gpu_check.isChecked() == True:
-    #        self.advanced_check.setChecked( False )
+        self.entry_step.setEnabled(False)
+        self.engine_choice.setEnabled(False)
+        self.label_iter.setText("Inserisci il numero di iterazioni:")
+        self.entry_iter.setText("50000000")
+        self.entry_step.setText("0.001")
+        self.algo_choice.setCurrentIndex( 0 )
 
 #
 #
