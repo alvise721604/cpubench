@@ -16,7 +16,7 @@ def gaussian_integral( iterations: int, step: float ) -> Tuple[float, float]:
     start_time = time.time()
     for k in range(iterations):
         result += math.exp( -(x*x) ) * step
-        x += step
+        x = (k+1)*step
     result *= 2.0
     result = math.pow(result, 2)
     duration = time.time() - start_time
@@ -29,7 +29,7 @@ def riemann_sinx_integral( iterations: int, step: float) -> Tuple[float, float]:
     start_time = time.time()
     for k in range(iterations):
         result += calculate_point_integral_sin(x) * step
-        x += step
+        x = (k+1)*step
     result = result * 2.0
     duration = time.time() - start_time
     return duration, result

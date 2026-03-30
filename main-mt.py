@@ -295,10 +295,13 @@ class PiCalculatorWindow(QWidget):
             self.entry_step.setEnabled(False)
             self.engine_choice.setEnabled(False)
             self.label_iter.setText("Inserisci il numero di iterazioni:")
+            self.entry_iter.setText("50000000")
         else:
             self.entry_step.setEnabled(True)
             self.engine_choice.setEnabled(True)
             self.label_iter.setText("Inserisci l'estremo d'integrazione")
+            self.entry_iter.setText("1000000")
+            self.entry_step.setText("0.001")
 
     # _______________________________________________________________________
     def on_reset_button_click(self):
@@ -306,16 +309,6 @@ class PiCalculatorWindow(QWidget):
             self.show_warning("Attenzione", "Non puoi fare reset mentre il calcolo è in esecuzione.")
             return
         self.reset_ui()
-        # self.entry_step.setEnabled(False)
-        # self.engine_choice.setEnabled(False)
-        # self.label_iter.setText("Inserisci il numero di iterazioni:")
-        # self.entry_iter.setText("50000000")
-        # self.entry_step.setText("0.001")
-        # self.algo_choice.setCurrentIndex(0)
-        # self.engine_choice.setCurrentIndex(0)
-        # self.result_label.setText("Risultato: ---")
-        # self.timer_label.setText("Durata: ---")
-
 
 if __name__ == "__main__":
     import signal
