@@ -226,7 +226,10 @@ class PiCalculatorWindow(QWidget):
                     duration = time.time() - start_time
 
             print(f"\tRisultato: {result:.8f}")
-            print(f"\tTempo: {duration:.6f} secondi")
+            if duration < 1:
+                print(f"\tTempo: {duration:.6f} secondi")
+            else:
+                print(f"\tTempo: {duration:.3f} secondi")
 
             self.result_queue.put({
                 "ok": True,
@@ -248,29 +251,6 @@ class PiCalculatorWindow(QWidget):
             return
 
         try:
-            # iterations = int(self.entry_iter.text())
-            # if iterations < 1:
-            #     self.result_label.setText("Errore: iterazioni deve essere almeno 1")
-            #     return
-
-            # if iterations < 1000:
-            #     self.show_warning(
-            #         "Attenzione",
-            #         "Attenzione: poche iterazioni (<1000) possono dare valori poco accurati di pi-greco",
-            #     )
-
-            # step = float(self.entry_step.text())
-
-            # if step > 0.001:
-            #     self.show_warning(
-            #         "Attenzione",
-            #         "Valori maggiori di 0.001 non sono raccomandati per un calcolo accurato di pi-greco.",
-            #     )
-
-            # if step <= 0:
-            #     self.result_label.setText("Errore: lo step non può essere zero o negativo")
-            #     return
-
             engine = self.engine_choice.currentText()
             algorithm = self.algo_choice.currentText()
 
