@@ -23,12 +23,11 @@ import calc
 
 LEIBNIZ_ITERATIONS = 800_000_000
 EULER_ITERATIONS = 400_000_000
-RIEMANN_SIN_LIMIT = 100_000
-RIEMANN_GAUSS_LIMIT = 100_000
-RIEMANN_SIN_LIMIT_VEC = 100_000
-RIEMANN_GAUSS_LIMIT_VEC = 200_000
-RIEMANN_STEP = 0.001
-RIEMANN_STEP_VEC = 0.0001
+
+RIEMANN_GAUSS_LIMIT = 1000
+RIEMANN_STEP = 1e-06
+
+
 CORES = os.cpu_count()
 
 class PiCalculatorWindow(QWidget):
@@ -39,7 +38,7 @@ class PiCalculatorWindow(QWidget):
             "Leibniz",
             #"Leibniz MP",
             "Euler",
-            "Riemann sinx/x Integral",
+            #"Riemann sinx/x Integral",
             "Gaussian Integral",
         ]
         self.engine_choices = [
@@ -187,24 +186,24 @@ class PiCalculatorWindow(QWidget):
                 result = calc.pi_euler_multiprocessing(iterations=EULER_ITERATIONS, num_procs=CORES)
                 duration = time.time() - start_time
 
-            if algorithm == "Riemann sinx/x Integral":
-                if engine == "CPU Numpy Vectorized":
-                    print(f"-> Calcolo con metodo Integrale sin(x)/x VETTORIZZATO: limite={RIEMANN_SIN_LIMIT_VEC}, step={RIEMANN_STEP_VEC}")
-                    start_time = time.time()
-                    result = calc.riemann_sinx_integral_vectorized(
-                        limit=RIEMANN_SIN_LIMIT_VEC,
-                        step=RIEMANN_STEP_VEC,
-                    )
-                    duration = time.time() - start_time
+            # if algorithm == "Riemann sinx/x Integral":
+            #     if engine == "CPU Numpy Vectorized":
+            #         print(f"-> Calcolo con metodo Integrale sin(x)/x VETTORIZZATO: limite={RIEMANN_SIN_LIMIT_VEC}, step={RIEMANN_STEP_VEC}")
+            #         start_time = time.time()
+            #         result = calc.riemann_sinx_integral_vectorized(
+            #             limit=RIEMANN_SIN_LIMIT_VEC,
+            #             step=RIEMANN_STEP_VEC,
+            #         )
+            #         duration = time.time() - start_time
 
-                else:
-                    print(f"-> Calcolo con metodo Integrale sin(x)/x NORMALE: limite={RIEMANN_SIN_LIMIT}, step={RIEMANN_STEP}")
-                    start_time = time.time()
-                    result = calc.riemann_sinx_integral(
-                        iterations=int(RIEMANN_SIN_LIMIT / RIEMANN_STEP),
-                        step=RIEMANN_STEP,
-                    )
-                    duration = time.time() - start_time
+            #     else:
+            #         print(f"-> Calcolo con metodo Integrale sin(x)/x NORMALE: limite={RIEMANN_SIN_LIMIT}, step={RIEMANN_STEP}")
+            #         start_time = time.time()
+            #         result = calc.riemann_sinx_integral(
+            #             iterations=int(RIEMANN_SIN_LIMIT / RIEMANN_STEP),
+            #             step=RIEMANN_STEP,
+            #         )
+            #         duration = time.time() - start_time
 
             if algorithm == "Gaussian Integral":
                 if engine == "CPU Normal":
@@ -217,11 +216,11 @@ class PiCalculatorWindow(QWidget):
                     duration = time.time() - start_time
 
                 else:
-                    print(f"-> Calcolo con metodo Integrale Gaussiano VETTORIZZATO: limite={RIEMANN_GAUSS_LIMIT_VEC}, step={RIEMANN_STEP_VEC}")
+                    print(f"-> Calcolo con metodo Integrale Gaussiano VETTORIZZATO: limite={RIEMANN_GAUSS_LIMIT}, step={RIEMANN_STEP}")
                     start_time = time.time()
                     result = calc.gaussian_integral_numpy_vectorized(
-                        limit=RIEMANN_GAUSS_LIMIT_VEC,
-                        step=RIEMANN_STEP_VEC,
+                        limit=RIEMANN_GAUSS_LIMIT,
+                        step=RIEMANN_STEP,
                     )
                     duration = time.time() - start_time
 
