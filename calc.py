@@ -53,7 +53,7 @@ def pi_euler_multiprocessing(iterations: int, num_procs: int = 4) -> float:
         results = pool.map(_euler_chunk_mp, intervals)
 
     total = sum(results)
-    return math.sqrt(6 * total)
+    return math.sqrt(6.0 * total)
 
 #___________________________________________________________________________________________________________________
 def calculate_point_integral_sin(x: float) -> float:
@@ -63,26 +63,50 @@ def calculate_point_integral_sin(x: float) -> float:
         return 1.0
 
 #___________________________________________________________________________________________________________________
-def gaussian_integral( iterations: int, step: float ) -> Tuple[float, float]:
+def gaussian_integral( iterations: int, step: float ) -> float:
     result = 0.0
     x = 0.0
-    start_time = time.time()
+    #start_time = time.time()
     for k in range(iterations):
         result += math.exp( -(x*x) ) * step
         x = (k+1)*step
     result *= 2.0
-    result = math.pow(result, 2)
-    duration = time.time() - start_time
-    return duration, result
+    #result = math.pow(result, 2)
+    #duration = time.time() - start_time
+    #return duration, result
+    return math.pow(result, 2)
 
 #___________________________________________________________________________________________________________________
-def riemann_sinx_integral( iterations: int, step: float) -> Tuple[float, float]:
+def riemann_sinx_integral( iterations: int, step: float) -> float:
     result = 0.0
     x = 0.0
-    start_time = time.time()
+    #start_time = time.time()
     for k in range(iterations):
         result += calculate_point_integral_sin(x) * step
         x = (k+1)*step
-    result = result * 2.0
-    duration = time.time() - start_time
-    return duration, result
+    #result = result * 2.0
+    #duration = time.time() - start_time
+    #return duration, result
+    return 2.0*result
+
+#___________________________________________________________________________________________________________________
+def riemann_sinx_integral_vectorized(limit: float, step: float) -> float:
+    x = np.arange(0.0, limit, step, dtype=np.float64)
+
+    y = np.ones_like(x)
+    mask = x != 0.0
+    y[mask] = np.sin(x[mask]) / x[mask]
+
+    result = y.sum() * step
+    return result * 2.0
+
+#___________________________________________________________________________________________________________________
+#def gaussian_integral_numpy_vectorized(limit: float, step: float) -> float:
+#    x = np.arange(0.0, limit, step, dtype=np.float32)
+#    result = np.exp(-(x * x)).sum() * step
+#    #result *= 2.0
+#    return math.pow(result*2.0,2)
+def gaussian_integral_numpy_vectorized(limit: float, step: float) -> float:
+    x = np.arange(0.0, limit, step, dtype=np.float64)
+    integral_half = np.exp(-(x * x)).sum() * step
+    return (2.0 * integral_half) ** 2
