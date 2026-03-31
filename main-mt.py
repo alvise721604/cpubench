@@ -29,7 +29,7 @@ RIEMANN_SIN_LIMIT_VEC = 100_000
 RIEMANN_GAUSS_LIMIT_VEC = 200_000
 RIEMANN_STEP = 0.001
 RIEMANN_STEP_VEC = 0.0001
-CORES = os.cpu_count() -1
+CORES = os.cpu_count()
 
 class PiCalculatorWindow(QWidget):
     def __init__(self):
