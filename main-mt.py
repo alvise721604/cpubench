@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
     QApplication,
     QWidget,
     QLabel,
-    QLineEdit,
+    #QLineEdit,
     QPushButton,
     QComboBox,
     QMessageBox,
@@ -19,7 +19,6 @@ from PyQt6.QtWidgets import (
 )
 
 import calc
-#import calc_vec
 
 LEIBNIZ_ITERATIONS = 800_000_000
 EULER_ITERATIONS = 400_000_000
@@ -27,6 +26,7 @@ EULER_ITERATIONS = 400_000_000
 RIEMANN_GAUSS_LIMIT = 1000
 RIEMANN_STEP = 1e-06
 
+FBELLARD_ITERATIONS = 10_000_000
 
 CORES = os.cpu_count()
 
@@ -36,9 +36,8 @@ class PiCalculatorWindow(QWidget):
         self.title = "Calcolo di π con vari metodi"
         self.algo_choices = [
             "Leibniz",
-            #"Leibniz MP",
             "Euler",
-            #"Riemann sinx/x Integral",
+            "F. Bellard",
             "Gaussian Integral",
         ]
         self.engine_choices = [
@@ -58,12 +57,7 @@ class PiCalculatorWindow(QWidget):
 
     # _______________________________________________________________________
     def reset_ui(self):
-        #self.entry_step.setEnabled(False)
         self.engine_choice.setEnabled(False)
-        #self.label_iter.setText("Inserisci il numero di iterazioni:")
-        #self.entry_iter.setText("100000000")
-        #self.entry_step.setText("0.001")
-        #self.algo_choice.setCurrentIndex(0)
         self.engine_choice.setCurrentIndex(0)
 
     # _______________________________________________________________________
@@ -82,14 +76,6 @@ class PiCalculatorWindow(QWidget):
         self.engine_choice = QComboBox()
         self.engine_choice.addItems(self.engine_choices)
 
-        #self.label_iter = QLabel("Inserisci il numero di iterazioni:")
-        #self.entry_iter = QLineEdit()
-        #self.entry_iter.setText("10000")
-
-        #self.label_step = QLabel("Inserisci lo step d'integrazione:")
-        #self.entry_step = QLineEdit()
-        #self.entry_step.setText("0.001")
-
         self.calculate_button = QPushButton("Calcola")
         self.calculate_button.clicked.connect(self.on_calculate_button_click)
 
@@ -101,12 +87,6 @@ class PiCalculatorWindow(QWidget):
 
         layout.addWidget(self.algo_choice, 0, 0, 1, 2)
         layout.addWidget(self.engine_choice, 1, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignLeft)
-
-        #layout.addWidget(self.label_iter, 2, 0, alignment=Qt.AlignmentFlag.AlignRight)
-        #layout.addWidget(self.entry_iter, 2, 1)
-
-        #layout.addWidget(self.label_step, 3, 0, alignment=Qt.AlignmentFlag.AlignRight)
-        #layout.addWidget(self.entry_step, 3, 1)
 
         layout.addWidget(self.calculate_button, 2, 0, 1, 1)
         layout.addWidget(self.reset_button, 2, 1, 1, 1)
@@ -164,8 +144,6 @@ class PiCalculatorWindow(QWidget):
         self.reset_button.setEnabled(not busy)
         self.algo_choice.setEnabled(not busy)
         self.engine_choice.setEnabled(not busy and self.algo_choice.currentText() not in ("Leibniz", "Euler"))
-        #self.entry_iter.setEnabled(not busy)
-        #self.entry_step.setEnabled(not busy and self.algo_choice.currentText() not in ("Leibniz", "Euler"))
 
     # _______________________________________________________________________
     def worker_calculation( self, algorithm: str, engine: str ):
@@ -186,24 +164,11 @@ class PiCalculatorWindow(QWidget):
                 result = calc.pi_euler_multiprocessing(iterations=EULER_ITERATIONS, num_procs=CORES)
                 duration = time.time() - start_time
 
-            # if algorithm == "Riemann sinx/x Integral":
-            #     if engine == "CPU Numpy Vectorized":
-            #         print(f"-> Calcolo con metodo Integrale sin(x)/x VETTORIZZATO: limite={RIEMANN_SIN_LIMIT_VEC}, step={RIEMANN_STEP_VEC}")
-            #         start_time = time.time()
-            #         result = calc.riemann_sinx_integral_vectorized(
-            #             limit=RIEMANN_SIN_LIMIT_VEC,
-            #             step=RIEMANN_STEP_VEC,
-            #         )
-            #         duration = time.time() - start_time
-
-            #     else:
-            #         print(f"-> Calcolo con metodo Integrale sin(x)/x NORMALE: limite={RIEMANN_SIN_LIMIT}, step={RIEMANN_STEP}")
-            #         start_time = time.time()
-            #         result = calc.riemann_sinx_integral(
-            #             iterations=int(RIEMANN_SIN_LIMIT / RIEMANN_STEP),
-            #             step=RIEMANN_STEP,
-            #         )
-            #         duration = time.time() - start_time
+            if algorithm == "F. Bellard":
+                print(f"-> Calcolo con metodo Fabrice Bellard: iterazioni={FBELLARD_ITERATIONS}")
+                start_time = time.time()
+                result = calc.pi_fabrice_bellard(iterations=FBELLARD_ITERATIONS)#, num_procs=CORES)
+                duration = time.time() - start_time
 
             if algorithm == "Gaussian Integral":
                 if engine == "CPU Normal":
@@ -287,17 +252,10 @@ class PiCalculatorWindow(QWidget):
 
     # _______________________________________________________________________
     def on_algo_choice(self, selected_algorithm: str):
-        if selected_algorithm in ("Leibniz", "Euler", "Leibniz MP"):
-            #self.entry_step.setEnabled(False)
+        if selected_algorithm in ("Leibniz", "Euler", "F. Bellard"):
             self.engine_choice.setEnabled(False)
-            #self.label_iter.setText("Inserisci il numero di iterazioni:")
-            #self.entry_iter.setText("100000000")
         else:
-            #self.entry_step.setEnabled(True)
             self.engine_choice.setEnabled(True)
-            #self.label_iter.setText("Inserisci l'estremo d'integrazione")
-            #self.entry_iter.setText("1000000")
-            #self.entry_step.setText("0.001")
 
     # _______________________________________________________________________
     def on_reset_button_click(self):
