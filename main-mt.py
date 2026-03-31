@@ -1,3 +1,4 @@
+import os
 import sys
 import time
 import threading
@@ -20,6 +21,12 @@ from PyQt6.QtWidgets import (
 import calc
 import calc_vec
 
+LEIBNIZ_ITERATIONS = 800_000_000
+EULER_ITERATIONS = 400_000_000
+RIEMANN_SIN_LIMIT = 100_000
+RIEMANN_GAUSS_LIMIT = 100_000
+RIEMANN_STEP = 0.001
+CORES = os.cpu_count()
 
 class PiCalculatorWindow(QWidget):
     def __init__(self):
@@ -27,6 +34,7 @@ class PiCalculatorWindow(QWidget):
         self.title = "Calcolo di π con vari metodi"
         self.algo_choices = [
             "Leibniz",
+            #"Leibniz MP",
             "Euler",
             "Riemann sinx/x Integral",
             "Gaussian Integral",
@@ -48,12 +56,12 @@ class PiCalculatorWindow(QWidget):
 
     # _______________________________________________________________________
     def reset_ui(self):
-        self.entry_step.setEnabled(False)
+        #self.entry_step.setEnabled(False)
         self.engine_choice.setEnabled(False)
-        self.label_iter.setText("Inserisci il numero di iterazioni:")
-        self.entry_iter.setText("50000000")
-        self.entry_step.setText("0.001")
-        self.algo_choice.setCurrentIndex(0)
+        #self.label_iter.setText("Inserisci il numero di iterazioni:")
+        #self.entry_iter.setText("100000000")
+        #self.entry_step.setText("0.001")
+        #self.algo_choice.setCurrentIndex(0)
         self.engine_choice.setCurrentIndex(0)
 
     # _______________________________________________________________________
@@ -72,13 +80,13 @@ class PiCalculatorWindow(QWidget):
         self.engine_choice = QComboBox()
         self.engine_choice.addItems(self.engine_choices)
 
-        self.label_iter = QLabel("Inserisci il numero di iterazioni:")
-        self.entry_iter = QLineEdit()
-        self.entry_iter.setText("10000")
+        #self.label_iter = QLabel("Inserisci il numero di iterazioni:")
+        #self.entry_iter = QLineEdit()
+        #self.entry_iter.setText("10000")
 
-        self.label_step = QLabel("Inserisci lo step d'integrazione:")
-        self.entry_step = QLineEdit()
-        self.entry_step.setText("0.001")
+        #self.label_step = QLabel("Inserisci lo step d'integrazione:")
+        #self.entry_step = QLineEdit()
+        #self.entry_step.setText("0.001")
 
         self.calculate_button = QPushButton("Calcola")
         self.calculate_button.clicked.connect(self.on_calculate_button_click)
@@ -92,16 +100,16 @@ class PiCalculatorWindow(QWidget):
         layout.addWidget(self.algo_choice, 0, 0, 1, 2)
         layout.addWidget(self.engine_choice, 1, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignLeft)
 
-        layout.addWidget(self.label_iter, 2, 0, alignment=Qt.AlignmentFlag.AlignRight)
-        layout.addWidget(self.entry_iter, 2, 1)
+        #layout.addWidget(self.label_iter, 2, 0, alignment=Qt.AlignmentFlag.AlignRight)
+        #layout.addWidget(self.entry_iter, 2, 1)
 
-        layout.addWidget(self.label_step, 3, 0, alignment=Qt.AlignmentFlag.AlignRight)
-        layout.addWidget(self.entry_step, 3, 1)
+        #layout.addWidget(self.label_step, 3, 0, alignment=Qt.AlignmentFlag.AlignRight)
+        #layout.addWidget(self.entry_step, 3, 1)
 
-        layout.addWidget(self.calculate_button, 4, 0, 1, 1)
-        layout.addWidget(self.reset_button, 4, 1, 1, 1)
-        layout.addWidget(self.result_label, 5, 0, 1, 2)
-        layout.addWidget(self.timer_label, 6, 0, 1, 2)
+        layout.addWidget(self.calculate_button, 2, 0, 1, 1)
+        layout.addWidget(self.reset_button, 2, 1, 1, 1)
+        layout.addWidget(self.result_label, 3, 0, 1, 2)
+        layout.addWidget(self.timer_label, 4, 0, 1, 2)
 
         layout.addWidget(
             self.label_copyright,
@@ -154,62 +162,59 @@ class PiCalculatorWindow(QWidget):
         self.reset_button.setEnabled(not busy)
         self.algo_choice.setEnabled(not busy)
         self.engine_choice.setEnabled(not busy and self.algo_choice.currentText() not in ("Leibniz", "Euler"))
-        self.entry_iter.setEnabled(not busy)
-        self.entry_step.setEnabled(not busy and self.algo_choice.currentText() not in ("Leibniz", "Euler"))
+        #self.entry_iter.setEnabled(not busy)
+        #self.entry_step.setEnabled(not busy and self.algo_choice.currentText() not in ("Leibniz", "Euler"))
 
     # _______________________________________________________________________
-    def worker_calculation(self, algorithm: str, engine: str, iterations: int, step: float):
+    def worker_calculation( self, algorithm: str, engine: str ):
         try:
-            if algorithm == "Leibniz":
-                print(f"-> Calcolo con metodo Leibniz: iterazioni={iterations}")
-                result = 0.0
-                start_time = time.time()
-                for k in range(iterations):
-                    result += (-1) ** k / (2 * k + 1)
-                result *= 4
-                duration = time.time() - start_time
 
-            elif algorithm == "Euler":
-                print(f"-> Calcolo con metodo Euler: iterazioni={iterations}")
-                result = 0.0
-                start_time = time.time()
-                for k in range(iterations):
-                    result += 1 / ((k + 1) * (k + 1))
-                result *= 6
-                result = np.sqrt(result)
-                duration = time.time() - start_time
-
-            elif algorithm == "Riemann sinx/x Integral":
-                if engine == "CPU Numpy Vectorized":
-                    print(f"-> Calcolo con metodo Integrale sin(x)/x VETTORIZZATO: limite={iterations}, step={step}")
-                    duration, result = calc_vec.riemann_sinx_integral_vectorized(
-                        limit=iterations,
-                        step=step,
-                    )
-                else:
-                    print(f"-> Calcolo con metodo Integrale sin(x)/x NORMALE: limite={iterations}, step={step}")
-                    duration, result = calc.riemann_sinx_integral(
-                        iterations=int(iterations / step),
-                        step=step,
-                    )
-
-            elif algorithm == "Gaussian Integral":
-                if engine == "CPU Normal":
-                    print(f"-> Calcolo con metodo Integrale Gaussiano NORMALE: limite={iterations}, step={step}")
-                    duration, result = calc.gaussian_integral(
-                        iterations=int(iterations / step),
-                        step=step,
-                    )
-                else:
-                    print(f"-> Calcolo con metodo Integrale Gaussiano VETTORIZZATO: limite={iterations}, step={step}")
-                    duration, result = calc_vec.gaussian_integral_numpy_vectorized(
-                        limit=iterations,
-                        step=step,
-                    )
-            else:
+            if algorithm not in self.algo_choices:
                 raise ValueError(f"Algoritmo non supportato: {algorithm}")
 
-            print(f"\tRisultato: {result:.5f}")
+            if algorithm == "Leibniz":
+                print(f"-> Calcolo con metodo Leibniz mp: iterazioni={EULER_ITERATIONS}")
+                start_time = time.time()
+                result = calc.pi_leibniz_multiprocessing(iterations=EULER_ITERATIONS, num_procs=CORES)
+                duration = time.time() - start_time
+
+            if algorithm == "Euler":
+                print(f"-> Calcolo con metodo Euler: iterazioni={EULER_ITERATIONS}")
+                start_time = time.time()
+                result = calc.pi_euler_multiprocessing(iterations=EULER_ITERATIONS, num_procs=CORES)
+                duration = time.time() - start_time
+
+            if algorithm == "Riemann sinx/x Integral":
+                if engine == "CPU Numpy Vectorized":
+                    print(f"-> Calcolo con metodo Integrale sin(x)/x VETTORIZZATO: limite={RIEMANN_SIN_LIMIT}, step={RIEMANN_STEP}")
+                    duration, result = calc_vec.riemann_sinx_integral_vectorized(
+                        limit=RIEMANN_SIN_LIMIT,
+                        step=RIEMANN_STEP,
+                    )
+                else:
+                    print(f"-> Calcolo con metodo Integrale sin(x)/x NORMALE: limite={RIEMANN_SIN_LIMIT}, step={RIEMANN_STEP}")
+                    duration, result = calc.riemann_sinx_integral(
+                        iterations=int(RIEMANN_SIN_LIMIT / RIEMANN_STEP),
+                        step=RIEMANN_STEP,
+                    )
+
+            if algorithm == "Gaussian Integral":
+                if engine == "CPU Normal":
+                    print(f"-> Calcolo con metodo Integrale Gaussiano NORMALE: limite={RIEMANN_GAUSS_LIMIT}, step={RIEMANN_STEP}")
+                    duration, result = calc.gaussian_integral(
+                        iterations=int(RIEMANN_GAUSS_LIMIT / RIEMANN_STEP),
+                        step=RIEMANN_STEP,
+                    )
+                else:
+                    print(f"-> Calcolo con metodo Integrale Gaussiano VETTORIZZATO: limite={RIEMANN_GAUSS_LIMIT}, step={RIEMANN_STEP}")
+                    duration, result = calc_vec.gaussian_integral_numpy_vectorized(
+                        limit=RIEMANN_GAUSS_LIMIT,
+                        step=RIEMANN_STEP,
+                    )
+            #else:
+            #    raise ValueError(f"Algoritmo non supportato: {algorithm}")
+
+            print(f"\tRisultato: {result:.8f}")
             print(f"\tTempo: {duration:.6f} secondi")
 
             self.result_queue.put({
@@ -231,28 +236,28 @@ class PiCalculatorWindow(QWidget):
             return
 
         try:
-            iterations = int(self.entry_iter.text())
-            if iterations < 1:
-                self.result_label.setText("Errore: iterazioni deve essere almeno 1")
-                return
+            # iterations = int(self.entry_iter.text())
+            # if iterations < 1:
+            #     self.result_label.setText("Errore: iterazioni deve essere almeno 1")
+            #     return
 
-            if iterations < 1000:
-                self.show_warning(
-                    "Attenzione",
-                    "Attenzione: poche iterazioni (<1000) possono dare valori poco accurati di pi-greco",
-                )
+            # if iterations < 1000:
+            #     self.show_warning(
+            #         "Attenzione",
+            #         "Attenzione: poche iterazioni (<1000) possono dare valori poco accurati di pi-greco",
+            #     )
 
-            step = float(self.entry_step.text())
+            # step = float(self.entry_step.text())
 
-            if step > 0.001:
-                self.show_warning(
-                    "Attenzione",
-                    "Valori maggiori di 0.001 non sono raccomandati per un calcolo accurato di pi-greco.",
-                )
+            # if step > 0.001:
+            #     self.show_warning(
+            #         "Attenzione",
+            #         "Valori maggiori di 0.001 non sono raccomandati per un calcolo accurato di pi-greco.",
+            #     )
 
-            if step <= 0:
-                self.result_label.setText("Errore: lo step non può essere zero o negativo")
-                return
+            # if step <= 0:
+            #     self.result_label.setText("Errore: lo step non può essere zero o negativo")
+            #     return
 
             engine = self.engine_choice.currentText()
             algorithm = self.algo_choice.currentText()
@@ -263,7 +268,7 @@ class PiCalculatorWindow(QWidget):
 
             self.worker_thread = threading.Thread(
                 target=self.worker_calculation,
-                args=(algorithm, engine, iterations, step),
+                args=(algorithm, engine),
                 daemon=True,
             )
             self.worker_thread.start()
@@ -291,17 +296,17 @@ class PiCalculatorWindow(QWidget):
 
     # _______________________________________________________________________
     def on_algo_choice(self, selected_algorithm: str):
-        if selected_algorithm in ("Leibniz", "Euler"):
-            self.entry_step.setEnabled(False)
+        if selected_algorithm in ("Leibniz", "Euler", "Leibniz MP"):
+            #self.entry_step.setEnabled(False)
             self.engine_choice.setEnabled(False)
-            self.label_iter.setText("Inserisci il numero di iterazioni:")
-            self.entry_iter.setText("50000000")
+            #self.label_iter.setText("Inserisci il numero di iterazioni:")
+            #self.entry_iter.setText("100000000")
         else:
-            self.entry_step.setEnabled(True)
+            #self.entry_step.setEnabled(True)
             self.engine_choice.setEnabled(True)
-            self.label_iter.setText("Inserisci l'estremo d'integrazione")
-            self.entry_iter.setText("1000000")
-            self.entry_step.setText("0.001")
+            #self.label_iter.setText("Inserisci l'estremo d'integrazione")
+            #self.entry_iter.setText("1000000")
+            #self.entry_step.setText("0.001")
 
     # _______________________________________________________________________
     def on_reset_button_click(self):
