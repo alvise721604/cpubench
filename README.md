@@ -5,3 +5,4 @@ Required python modules:
 - pyqt6
 
 Tested with python3.14
+
