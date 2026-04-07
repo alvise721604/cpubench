@@ -20,6 +20,10 @@ add_executable(PiCalculatorQtCpp
 target_include_directories(PiCalculatorQtCpp PRIVATE src)
 target_link_libraries(PiCalculatorQtCpp PRIVATE Qt6::Widgets)
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+    target_compile_options(PiCalculatorQtCpp PRIVATE -O2)
+endif()
+
 if(APPLE)
     set_target_properties(PiCalculatorQtCpp PROPERTIES
         MACOSX_BUNDLE TRUE
