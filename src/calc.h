@@ -6,9 +6,12 @@
 namespace calc {
 
 double pi_fabrice_bellard(int iterations);
-double pi_leibniz_parallel(std::size_t iterations, unsigned int num_threads);
-double pi_euler_parallel(std::size_t iterations, unsigned int num_threads);
+double pi_leibniz_omp(std::size_t iterations);
+double pi_leibniz(std::size_t iterations);
+double pi_leibniz_omp(std::size_t iterations);
+double pi_euler_omp(std::size_t iterations);
+double pi_euler(std::size_t iterations);
 double gaussian_integral(std::size_t iterations, double step);
-double gaussian_integral_parallel(double limit, double step, unsigned int num_threads);
+double gaussian_integral_omp(std::size_t iterations, double step);
 
 } // namespace calc
