@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <vector>
 
+
 namespace {
 
     unsigned int sanitize_thread_count(unsigned int num_threads) {
