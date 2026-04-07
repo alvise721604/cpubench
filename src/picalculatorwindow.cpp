@@ -17,16 +17,18 @@
 
 namespace {
 
+constexpr std::size_t LEIBNIZ_ITERATIONS_PARAL = 8000'000'000ULL;
 constexpr std::size_t LEIBNIZ_ITERATIONS = 8000'000'000ULL;
 constexpr std::size_t EULER_ITERATIONS = 8000'000'000ULL;
+constexpr std::size_t EULER_ITERATIONS_PARAL = 8000'000'000ULL;
 constexpr double RIEMANN_GAUSS_LIMIT = 1000.0;
 constexpr double RIEMANN_STEP = 1e-07;
 constexpr int FBELLARD_ITERATIONS = 100'000'000;
 
-unsigned int available_threads() {
-    const unsigned int n = std::thread::hardware_concurrency();
-    return n == 0 ? 1u : n;
-}
+// unsigned int available_threads() {
+//     const unsigned int n = std::thread::hardware_concurrency();
+//     return n == 0 ? 1u : n;
+// }
 
 } // namespace
 
@@ -34,7 +36,7 @@ PiCalculatorWindow::PiCalculatorWindow(QWidget *parent)
     : QWidget(parent),
       title_("Calcolo di π con vari metodi"),
       algo_choices_({"Leibniz", "Euler", "F. Bellard", "Gaussian Integral"}),
-      engine_choices_({"CPU Normal", "CPU parallelized"}) {
+      engine_choices_({"Single Core", "Multi Core"}) {
     init_ui();
 
     queue_timer_ = new QTimer(this);
@@ -50,8 +52,8 @@ PiCalculatorWindow::~PiCalculatorWindow() {
 }
 
 void PiCalculatorWindow::reset_ui() {
-    engine_choice_->setEnabled(false);
-    engine_choice_->setCurrentIndex(0);
+//    engine_choice_->setEnabled(false);
+//    engine_choice_->setCurrentIndex(0);
 }
 
 void PiCalculatorWindow::init_ui() {
@@ -129,7 +131,7 @@ void PiCalculatorWindow::set_ui_busy(bool busy) {
     calculate_button_->setEnabled(!busy);
     reset_button_->setEnabled(!busy);
     algo_choice_->setEnabled(!busy);
-    engine_choice_->setEnabled(!busy && algo_choice_->currentText() == "Gaussian Integral");
+    //engine_choice_->setEnabled(!busy && algo_choice_->currentText() == "Gaussian Integral");
 }
 
 bool PiCalculatorWindow::is_worker_running() const {
@@ -151,22 +153,44 @@ void PiCalculatorWindow::worker_calculation(QString algorithm, QString engine) {
             throw std::invalid_argument(QString("Algoritmo non supportato: %1").arg(algorithm).toStdString());
         }
 
-        const auto start_time = std::chrono::steady_clock::now();
         double result = 0.0;
-        const unsigned int threads = available_threads();
+        bool omp = false;
+        if (engine == "Multi Core")
+            omp = true;
+        const auto start_time = std::chrono::steady_clock::now();
+        
+        //const unsigned int threads = available_threads();
 
-        if (algorithm == "Leibniz") {
-            result = calc::pi_leibniz_parallel(LEIBNIZ_ITERATIONS, threads);
-        } else if (algorithm == "Euler") {
-            result = calc::pi_euler_parallel(EULER_ITERATIONS, threads);
-        } else if (algorithm == "F. Bellard") {
+        //------------------------------------------------------------------
+        if (algorithm == "Leibniz"){
+            if(omp) {
+                result = calc::pi_leibniz_omp(LEIBNIZ_ITERATIONS_PARAL);
+            } else {
+                result = calc::pi_leibniz(LEIBNIZ_ITERATIONS);
+            }
+        }
+
+        //------------------------------------------------------------------
+        if (algorithm == "Euler") {
+            if(omp) {
+                result = calc::pi_euler_omp(EULER_ITERATIONS_PARAL);
+            } else {
+                result = calc::pi_euler(EULER_ITERATIONS);
+            }
+        }
+
+        //------------------------------------------------------------------
+        if (algorithm == "F. Bellard")
             result = calc::pi_fabrice_bellard(FBELLARD_ITERATIONS);
-        } else if (algorithm == "Gaussian Integral") {
-            if (engine == "CPU Normal") {
+        
+        //------------------------------------------------------------------
+        if (algorithm == "Gaussian Integral") {
+            if(omp) {
+                const auto iterations = static_cast<std::size_t>(RIEMANN_GAUSS_LIMIT / RIEMANN_STEP);
+                result = calc::gaussian_integral_omp(iterations, RIEMANN_STEP);
+            } else {
                 const auto iterations = static_cast<std::size_t>(RIEMANN_GAUSS_LIMIT / RIEMANN_STEP);
                 result = calc::gaussian_integral(iterations, RIEMANN_STEP);
-            } else {
-                result = calc::gaussian_integral_parallel(RIEMANN_GAUSS_LIMIT, RIEMANN_STEP, threads);
             }
         }
 
@@ -254,5 +278,5 @@ void PiCalculatorWindow::on_reset_button_click() {
 }
 
 void PiCalculatorWindow::on_algo_choice(const QString &text) {
-    engine_choice_->setEnabled(text == "Gaussian Integral");
+    //engine_choice_->setEnabled(text == "Gaussian Integral");
 }
