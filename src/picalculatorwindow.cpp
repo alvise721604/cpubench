@@ -25,6 +25,9 @@ namespace {
     constexpr double RIEMANN_STEP = 1e-07;
     constexpr int FBELLARD_ITERATIONS = 100'000'000;
     constexpr int FBELLARD_ITERATIONS_PARAL = 1000'000'000;
+    constexpr int WALLIS_ITERATIONS = 100'000'000;
+    constexpr int WALLIS_ITERATIONS_PARAL = 1000'000'000;
+    
 
 
 } // namespace
@@ -32,7 +35,7 @@ namespace {
 PiCalculatorWindow::PiCalculatorWindow(QWidget *parent)
     : QWidget(parent),
       title_("Calcolo di π con vari metodi"),
-      algo_choices_({"Leibniz", "Euler", "F. Bellard", "Gaussian Integral"}),
+      algo_choices_({"Leibniz", "Euler", "F. Bellard", "Gaussian Integral", "Wallis"}),
       engine_choices_({"Single Core", "Multi Core"}) {
     init_ui();
 
@@ -190,6 +193,15 @@ void PiCalculatorWindow::worker_calculation(QString algorithm, QString engine) {
             }
         }
 
+        //------------------------------------------------------------------
+        if (algorithm == "Wallis") {
+            if(omp) {
+                result = calc::wallis_omp(WALLIS_ITERATIONS_PARAL);
+            } else {
+                result = calc::wallis(WALLIS_ITERATIONS);
+            }
+        }
+        
         const auto end_time = std::chrono::steady_clock::now();
         message.ok = true;
         message.result = result;

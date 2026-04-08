@@ -169,4 +169,29 @@ namespace calc {
         return result * result;
     }
 
+    /*
+      Wallis
+    */
+    double wallis( std::size_t iterations ) {
+        double sum = 0.0;
+        for (unsigned long long k = 1; k < iterations; ++k) {
+            sum *= 4*k*k / (4*k*k-1);
+        } 
+
+        return 2.0*sum;
+    }
+
+    /*
+      Wallis OMP
+    */
+    double wallis_omp( std::size_t iterations ) {
+        double sum = 0.0;
+        #pragma omp parallel for simd reduction(+:sum)
+        for (unsigned long long k = 1; k < iterations; ++k) {
+            sum *= 4*k*k / (4*k*k-1);
+        } 
+
+        return 2.0*sum;
+    }
+
 } // namespace calc
