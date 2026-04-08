@@ -111,7 +111,7 @@ namespace calc {
     double pi_euler(std::size_t iterations) {
         //const double sum = parallel_sum(1, iterations + 1, num_threads, [](std::size_t start, std::size_t end) {
         double sum = 0.0;
-        for (unsigned long long n = 0; n < iterations; ++n) {
+        for (unsigned long long n = 1; n < iterations; ++n) {
             const double d = static_cast<double>(n);
             sum += 1.0 / (d * d);
         }
@@ -125,7 +125,7 @@ namespace calc {
         double sum = 0.0;
 
         #pragma omp parallel for simd reduction(+:sum)
-        for (unsigned long long n = 0; n < iterations; ++n) {
+        for (unsigned long long n = 1; n < iterations; ++n) {
             const double d = static_cast<double>(n);
             sum += 1.0 / (d * d);
         }

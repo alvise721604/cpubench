@@ -17,18 +17,14 @@
 
 namespace {
 
-constexpr std::size_t LEIBNIZ_ITERATIONS_PARAL = 8000'000'000ULL;
-constexpr std::size_t LEIBNIZ_ITERATIONS = 8000'000'000ULL;
-constexpr std::size_t EULER_ITERATIONS = 8000'000'000ULL;
-constexpr std::size_t EULER_ITERATIONS_PARAL = 8000'000'000ULL;
-constexpr double RIEMANN_GAUSS_LIMIT = 1000.0;
-constexpr double RIEMANN_STEP = 1e-07;
-constexpr int FBELLARD_ITERATIONS = 100'000'000;
+    constexpr std::size_t LEIBNIZ_ITERATIONS_PARAL = 8000'000'000ULL;
+    constexpr std::size_t LEIBNIZ_ITERATIONS = 8000'000'000ULL;
+    constexpr std::size_t EULER_ITERATIONS = 8000'000'000ULL;
+    constexpr std::size_t EULER_ITERATIONS_PARAL = 8000'000'000ULL;
+    constexpr double RIEMANN_GAUSS_LIMIT = 1000.0;
+    constexpr double RIEMANN_STEP = 1e-07;
+    constexpr int FBELLARD_ITERATIONS = 100'000'000;
 
-// unsigned int available_threads() {
-//     const unsigned int n = std::thread::hardware_concurrency();
-//     return n == 0 ? 1u : n;
-// }
 
 } // namespace
 
