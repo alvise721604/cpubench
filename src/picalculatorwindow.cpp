@@ -24,6 +24,7 @@ namespace {
     constexpr double RIEMANN_GAUSS_LIMIT = 1000.0;
     constexpr double RIEMANN_STEP = 1e-07;
     constexpr int FBELLARD_ITERATIONS = 100'000'000;
+    constexpr int FBELLARD_ITERATIONS_PARAL = 1000'000'000;
 
 
 } // namespace
@@ -155,8 +156,6 @@ void PiCalculatorWindow::worker_calculation(QString algorithm, QString engine) {
             omp = true;
         const auto start_time = std::chrono::steady_clock::now();
         
-        //const unsigned int threads = available_threads();
-
         //------------------------------------------------------------------
         if (algorithm == "Leibniz"){
             if(omp) {
@@ -176,8 +175,9 @@ void PiCalculatorWindow::worker_calculation(QString algorithm, QString engine) {
         }
 
         //------------------------------------------------------------------
-        if (algorithm == "F. Bellard")
+        if (algorithm == "F. Bellard") {
             result = calc::pi_fabrice_bellard(FBELLARD_ITERATIONS);
+        }
         
         //------------------------------------------------------------------
         if (algorithm == "Gaussian Integral") {
@@ -274,5 +274,5 @@ void PiCalculatorWindow::on_reset_button_click() {
 }
 
 void PiCalculatorWindow::on_algo_choice(const QString &text) {
-    //engine_choice_->setEnabled(text == "Gaussian Integral");
+    engine_choice_->setDisabled(text == "F. Bellard");
 }

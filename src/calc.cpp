@@ -50,16 +50,13 @@ namespace calc {
         FABRICE BELLARD
      */
     double pi_fabrice_bellard(int iterations) {
-        if (iterations < 0) {
-            throw std::invalid_argument("iterations deve essere >= 0");
-        }
 
-        double sign = 1.0;
+        //double sign = 1.0;
         double result = 0.0;
         double factor = 1.0;
 
-        for (int n = 0; n < iterations; ++n) {
-            result += sign * factor * (
+        for (int n = 0; n < iterations-1; n+=2) {
+            result += factor * (
                 1.0 / (10.0 * n + 9.0)
                 - 4.0 / (10.0 * n + 7.0)
                 - 4.0 / (10.0 * n + 5.0)
@@ -68,8 +65,19 @@ namespace calc {
                 - 1.0 / (4.0 * n + 3.0)
                 - 32.0 / (4.0 * n + 1.0)
             );
-            sign = -sign;
-            factor /= 1024.0;
+            factor /= 1048576.0;
+        }
+        for (int n = 1; n < iterations-1; n+=2) {
+            result += -factor * (
+                1.0 / (10.0 * n + 9.0)
+                - 4.0 / (10.0 * n + 7.0)
+                - 4.0 / (10.0 * n + 5.0)
+                - 64.0 / (10.0 * n + 3.0)
+                + 256.0 / (10.0 * n + 1.0)
+                - 1.0 / (4.0 * n + 3.0)
+                - 32.0 / (4.0 * n + 1.0)
+            );
+            factor /= 1048576.0;
         }
 
         return result / 64.0;
@@ -98,7 +106,7 @@ namespace calc {
         for (unsigned long long n = 0; n < iterations; n+=2) {
             sum += 1.0 / (2.0 * static_cast<double>(n) + 1.0);
         }
-        #pragma omp parallel for reduction(+:sum)
+        #pragma omp parallel for simd reduction(+:sum)
         for (unsigned long long n = 1; n < iterations; n+=2) {
             sum += (-1.0) / (2.0 * static_cast<double>(n) + 1.0);
         }
@@ -109,7 +117,6 @@ namespace calc {
         Single-CPU EULER
     */
     double pi_euler(std::size_t iterations) {
-        //const double sum = parallel_sum(1, iterations + 1, num_threads, [](std::size_t start, std::size_t end) {
         double sum = 0.0;
         for (unsigned long long n = 1; n < iterations; ++n) {
             const double d = static_cast<double>(n);
@@ -125,6 +132,7 @@ namespace calc {
         double sum = 0.0;
 
         #pragma omp parallel for simd reduction(+:sum)
+        
         for (unsigned long long n = 1; n < iterations; ++n) {
             const double d = static_cast<double>(n);
             sum += 1.0 / (d * d);
@@ -151,7 +159,7 @@ namespace calc {
     */
     double gaussian_integral_omp(std::size_t iterations, double step) {
         double result = 0.0;
-        double x = 0.0;
+        
         #pragma omp parallel for simd reduction(+:result)
         for (unsigned long long k = 0; k < iterations; ++k) {
             double x = static_cast<double>(k + 1) * step;

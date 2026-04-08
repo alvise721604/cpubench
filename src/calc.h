@@ -6,6 +6,7 @@
 namespace calc {
 
 double pi_fabrice_bellard(int iterations);
+//double pi_fabrice_bellard_omp(int iterations);
 double pi_leibniz_omp(std::size_t iterations);
 double pi_leibniz(std::size_t iterations);
 double pi_leibniz_omp(std::size_t iterations);
