@@ -7,43 +7,6 @@
 #include <vector>
 #include <omp.h>
 
-
-namespace {
-
-    // unsigned int sanitize_thread_count(unsigned int num_threads) {
-    //     return num_threads == 0 ? 1u : num_threads;
-    // }
-
-    // template <typename Function>
-    // double parallel_sum(std::size_t begin, std::size_t end, unsigned int num_threads, Function fn) {
-    //     num_threads = sanitize_thread_count(num_threads);
-    //     const std::size_t total = end - begin;
-    //     const std::size_t chunk_size = (total + num_threads - 1) / num_threads;
-
-    //     std::vector<std::future<double>> futures;
-    //     futures.reserve(num_threads);
-
-    //     for (unsigned int i = 0; i < num_threads; ++i) {
-    //         const std::size_t chunk_begin = begin + static_cast<std::size_t>(i) * chunk_size;
-    //         const std::size_t chunk_end = std::min(chunk_begin + chunk_size, end);
-    //         if (chunk_begin >= chunk_end) {
-    //             break;
-    //         }
-
-    //         futures.push_back(std::async(std::launch::async, [chunk_begin, chunk_end, &fn]() {
-    //             return fn(chunk_begin, chunk_end);
-    //         }));
-    //     }
-
-    //     double total_sum = 0.0;
-    //     for (auto &future : futures) {
-    //         total_sum += future.get();
-    //     }
-    //     return total_sum;
-    // }
-
-} // namespace
-
 namespace calc {
 
     /*
