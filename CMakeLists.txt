@@ -37,6 +37,7 @@ add_executable(PiCalculatorQtCpp
     src/main.cpp
     src/picalculatorwindow.cpp
     src/calc.cpp
+    src/mem.cpp
 )
 
 target_include_directories(PiCalculatorQtCpp PRIVATE src)
