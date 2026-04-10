@@ -20,9 +20,11 @@ public:
 
 private slots:
     void on_algo_choice(const QString &text);
+    void on_test_choice(const QString &text);
     void on_calculate_button_click();
     void on_reset_button_click();
     void check_worker_result();
+
 
 private:
     struct WorkerMessage {
@@ -37,15 +39,17 @@ private:
     void resize_and_center();
     void show_warning(const QString &title, const QString &text);
     void set_ui_busy(bool busy);
-    void worker_calculation(QString algorithm, QString engine);
+    void worker_calculation(QString test, QString algorithm, QString engine);
     bool is_worker_running() const;
     void join_worker_if_needed();
 
     QString title_;
     QStringList algo_choices_;
     QStringList engine_choices_;
+    QStringList test_choices_;
 
     QLabel *label_copyright_ = nullptr;
+    QComboBox *test_choice_ = nullptr;
     QComboBox *algo_choice_ = nullptr;
     QComboBox *engine_choice_ = nullptr;
     QPushButton *calculate_button_ = nullptr;
