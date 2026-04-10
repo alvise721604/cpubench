@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
     qDebug() << QStyleFactory::keys();
     app.setStyle("windowsvista");
-    PiCalculatorWindow window;
+    Window window;
     window.show();
 
     return app.exec();
