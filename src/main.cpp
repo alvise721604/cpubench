@@ -2,7 +2,7 @@
 #include <QStyleFactory>
 #include <QDebug>
 
-#include "picalculatorwindow.h"
+#include "window.h"
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
