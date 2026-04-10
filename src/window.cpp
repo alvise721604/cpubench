@@ -40,8 +40,9 @@ double seconds_between(clock_type::time_point a, clock_type::time_point b) {
 
 Window::Window(QWidget *parent)
     : QWidget(parent),
-      title_("Calcolo di π con vari metodi"),
+      title_("CPU/Mem benchmark"),
       algo_choices_({"Leibniz", "Euler", "F. Bellard", "Gaussian Integral", "Wallis", "MemTest"}),
+      test_choices_({"CPU", "Mem"}),
       engine_choices_({"Single Core", "Multi Core"}) {
     init_ui();
 
@@ -70,6 +71,10 @@ void Window::init_ui() {
 
     label_copyright_ = new QLabel("(C) Alvise Dorigo");
 
+    test_choice_ = new QComboBox();
+    test_choice_->addItems(test_choices_);
+    connect(test_choice_, &QComboBox::currentTextChanged, this, &Window::on_test_choice);
+
     algo_choice_ = new QComboBox();
     algo_choice_->addItems(algo_choices_);
     connect(algo_choice_, &QComboBox::currentTextChanged, this, &Window::on_algo_choice);
@@ -86,12 +91,13 @@ void Window::init_ui() {
     result_label_ = new QLabel("");
     timer_label_ = new QLabel("");
 
-    layout->addWidget(algo_choice_, 0, 0, 1, 2);
-    layout->addWidget(engine_choice_, 1, 0, 1, 2, Qt::AlignLeft);
-    layout->addWidget(calculate_button_, 2, 0, 1, 1);
-    layout->addWidget(reset_button_, 2, 1, 1, 1);
-    layout->addWidget(result_label_, 3, 0, 1, 2);
-    layout->addWidget(timer_label_, 4, 0, 1, 2);
+    layout->addWidget(test_choice_, 0, 0, 1, 2);
+    layout->addWidget(algo_choice_, 1, 0, 1, 2);
+    layout->addWidget(engine_choice_, 2, 0, 1, 2, Qt::AlignLeft);
+    layout->addWidget(calculate_button_, 3, 0, 1, 1);
+    layout->addWidget(reset_button_, 3, 1, 1, 1);
+    layout->addWidget(result_label_, 4, 0, 1, 2);
+    layout->addWidget(timer_label_, 5, 0, 1, 2);
     layout->addWidget(label_copyright_, 99, 0, 1, 2, Qt::AlignRight | Qt::AlignBottom);
 
     layout->setRowStretch(98, 1);
@@ -134,10 +140,14 @@ void Window::show_warning(const QString &title, const QString &text) {
 }
 
 void Window::set_ui_busy(bool busy) {
+    test_choice_->setEnabled(!busy);
     calculate_button_->setEnabled(!busy);
     reset_button_->setEnabled(!busy);
-    algo_choice_->setEnabled(!busy);
-    //engine_choice_->setEnabled(!busy && algo_choice_->currentText() == "Gaussian Integral");
+    if ( test_choice_->currentText() == "CPU" )
+        algo_choice_->setEnabled(!busy);
+    else
+        algo_choice_->setEnabled(false);
+    engine_choice_->setEnabled(!busy);
 }
 
 bool Window::is_worker_running() const {
@@ -151,20 +161,50 @@ void Window::join_worker_if_needed() {
     }
 }
 
-void Window::worker_calculation(QString algorithm, QString engine) {
+void Window::worker_calculation(QString test, QString algorithm, QString engine) {
     WorkerMessage message;
 
     try {
-        if (!algo_choices_.contains(algorithm)) {
-            throw std::invalid_argument(QString("Algoritmo non supportato: %1").arg(algorithm).toStdString());
-        }
+        //if (!algo_choices_.contains(algorithm)) {
+        //    throw std::invalid_argument(QString("Algoritmo non supportato: %1").arg(algorithm).toStdString());
+        //}
 
+        
         double result = 0.0;
         bool omp = false;
         if (engine == "Multi Core")
             omp = true;
         const auto start_time = std::chrono::steady_clock::now();
         
+        //------------------------------------------------------------------
+        if ( test == "Mem") {
+            if(omp) {
+                const std::size_t buffer_size = 5ull * 1024ull * 1024ull * 1024ull;
+                std::vector<char> buf(buffer_size);
+                mem::mem_test_init( buf );
+                auto t0 = clock_type::now();
+                mem::mem_test_write_omp( buf, MEMTEST_ITERATIONS );
+                auto t1 = clock_type::now();
+                double write_seconds = seconds_between(t0, t1);
+                double total_written = static_cast<double>(buffer_size) * MEMTEST_ITERATIONS;
+                double write_gbs = total_written / write_seconds / 1e9;
+                result = write_gbs;
+            } else {
+                const std::size_t buffer_size = 5ull * 1024ull * 1024ull * 1024ull;
+                std::vector<char> buf(buffer_size);
+                mem::mem_test_init( buf );
+                auto t0 = clock_type::now();
+                mem::mem_test_write( buf, MEMTEST_ITERATIONS );
+                auto t1 = clock_type::now();
+                double write_seconds = seconds_between(t0, t1);
+                double total_written = static_cast<double>(buffer_size) * MEMTEST_ITERATIONS;
+                double write_gbs = total_written / write_seconds / 1e9;
+                result = write_gbs;
+            }
+            algorithm = "none";
+        }
+
+
         //------------------------------------------------------------------
         if (algorithm == "Leibniz"){
             if(omp) {
@@ -207,33 +247,6 @@ void Window::worker_calculation(QString algorithm, QString engine) {
                 result = calc::wallis(WALLIS_ITERATIONS);
             }
         }
-
-        //------------------------------------------------------------------
-        if (algorithm == "MemTest") {
-            if(omp) {
-                const std::size_t buffer_size = 5ull * 1024ull * 1024ull * 1024ull;
-                std::vector<char> buf(buffer_size);
-                mem::mem_test_init( buf );
-                auto t0 = clock_type::now();
-                mem::mem_test_write_omp( buf, MEMTEST_ITERATIONS );
-                auto t1 = clock_type::now();
-                double write_seconds = seconds_between(t0, t1);
-                double total_written = static_cast<double>(buffer_size) * MEMTEST_ITERATIONS;
-                double write_gbs = total_written / write_seconds / 1e9;
-                result = write_gbs;
-            } else {
-                const std::size_t buffer_size = 5ull * 1024ull * 1024ull * 1024ull;
-                std::vector<char> buf(buffer_size);
-                mem::mem_test_init( buf );
-                auto t0 = clock_type::now();
-                mem::mem_test_write( buf, MEMTEST_ITERATIONS );
-                auto t1 = clock_type::now();
-                double write_seconds = seconds_between(t0, t1);
-                double total_written = static_cast<double>(buffer_size) * MEMTEST_ITERATIONS;
-                double write_gbs = total_written / write_seconds / 1e9;
-                result = write_gbs;
-            }
-        }
         
         const auto end_time = std::chrono::steady_clock::now();
         message.ok = true;
@@ -260,6 +273,7 @@ void Window::on_calculate_button_click() {
 
     join_worker_if_needed();
 
+    const QString test = test_choice_->currentText();
     const QString engine = engine_choice_->currentText();
     const QString algorithm = algo_choice_->currentText();
 
@@ -273,7 +287,7 @@ void Window::on_calculate_button_click() {
         worker_running_ = true;
     }
 
-    worker_thread_ = std::thread(&Window::worker_calculation, this, algorithm, engine);
+    worker_thread_ = std::thread(&Window::worker_calculation, this, test, algorithm, engine);
 }
 
 void Window::check_worker_result() {
@@ -320,4 +334,8 @@ void Window::on_reset_button_click() {
 
 void Window::on_algo_choice(const QString &text) {
     engine_choice_->setDisabled(text == "F. Bellard");
+}
+
+void Window::on_test_choice(const QString &text) {
+    algo_choice_->setDisabled(text == "Mem");
 }
