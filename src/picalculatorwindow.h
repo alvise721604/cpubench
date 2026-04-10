@@ -11,12 +11,12 @@ class QPushButton;
 class QComboBox;
 class QTimer;
 
-class PiCalculatorWindow : public QWidget {
+class Window : public QWidget {
     Q_OBJECT
 
 public:
-    explicit PiCalculatorWindow(QWidget *parent = nullptr);
-    ~PiCalculatorWindow() override;
+    explicit Window(QWidget *parent = nullptr);
+    ~Window() override;
 
 private slots:
     void on_algo_choice(const QString &text);
