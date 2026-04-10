@@ -35,7 +35,7 @@ endif()
 
 add_executable(PiCalculatorQtCpp
     src/main.cpp
-    src/picalculatorwindow.cpp
+    src/window.cpp
     src/calc.cpp
     src/mem.cpp
 )
