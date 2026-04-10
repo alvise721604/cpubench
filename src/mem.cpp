@@ -1,5 +1,6 @@
 #include "mem.h"
 #include <omp.h>
+#include <cstring>
 
 void mem::mem_test_init( std::vector<char> &buf ) {
     std::memset(buf.data(), 2, buf.size());
