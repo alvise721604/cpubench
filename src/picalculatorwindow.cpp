@@ -1,4 +1,4 @@
-#include "picalculatorwindow.h"
+#include "window.h"
 #include "calc.h"
 #include "mem.h"
 
@@ -38,7 +38,7 @@ double seconds_between(clock_type::time_point a, clock_type::time_point b) {
     return std::chrono::duration<double>(b - a).count();
 }
 
-PiCalculatorWindow::PiCalculatorWindow(QWidget *parent)
+Window::Window(QWidget *parent)
     : QWidget(parent),
       title_("Calcolo di π con vari metodi"),
       algo_choices_({"Leibniz", "Euler", "F. Bellard", "Gaussian Integral", "Wallis", "MemTest"}),
@@ -46,23 +46,23 @@ PiCalculatorWindow::PiCalculatorWindow(QWidget *parent)
     init_ui();
 
     queue_timer_ = new QTimer(this);
-    connect(queue_timer_, &QTimer::timeout, this, &PiCalculatorWindow::check_worker_result);
+    connect(queue_timer_, &QTimer::timeout, this, &Window::check_worker_result);
     queue_timer_->start(100);
 }
 
-PiCalculatorWindow::~PiCalculatorWindow() {
+Window::~Window() {
     if (queue_timer_ != nullptr) {
         queue_timer_->stop();
     }
     join_worker_if_needed();
 }
 
-void PiCalculatorWindow::reset_ui() {
+void Window::reset_ui() {
 //    engine_choice_->setEnabled(false);
 //    engine_choice_->setCurrentIndex(0);
 }
 
-void PiCalculatorWindow::init_ui() {
+void Window::init_ui() {
     setWindowTitle(title_);
 
     auto *layout = new QGridLayout();
@@ -72,16 +72,16 @@ void PiCalculatorWindow::init_ui() {
 
     algo_choice_ = new QComboBox();
     algo_choice_->addItems(algo_choices_);
-    connect(algo_choice_, &QComboBox::currentTextChanged, this, &PiCalculatorWindow::on_algo_choice);
+    connect(algo_choice_, &QComboBox::currentTextChanged, this, &Window::on_algo_choice);
 
     engine_choice_ = new QComboBox();
     engine_choice_->addItems(engine_choices_);
 
     calculate_button_ = new QPushButton("Calcola");
-    connect(calculate_button_, &QPushButton::clicked, this, &PiCalculatorWindow::on_calculate_button_click);
+    connect(calculate_button_, &QPushButton::clicked, this, &Window::on_calculate_button_click);
 
     reset_button_ = new QPushButton("Reset");
-    connect(reset_button_, &QPushButton::clicked, this, &PiCalculatorWindow::on_reset_button_click);
+    connect(reset_button_, &QPushButton::clicked, this, &Window::on_reset_button_click);
 
     result_label_ = new QLabel("");
     timer_label_ = new QLabel("");
@@ -109,7 +109,7 @@ void PiCalculatorWindow::init_ui() {
     reset_ui();
 }
 
-void PiCalculatorWindow::resize_and_center() {
+void Window::resize_and_center() {
     const QFontMetrics font_metrics(font());
     const int title_width = font_metrics.horizontalAdvance(title_) + 5;
 
@@ -129,29 +129,29 @@ void PiCalculatorWindow::resize_and_center() {
     setGeometry(center_x, center_y, window_width, window_height);
 }
 
-void PiCalculatorWindow::show_warning(const QString &title, const QString &text) {
+void Window::show_warning(const QString &title, const QString &text) {
     QMessageBox::warning(this, title, text);
 }
 
-void PiCalculatorWindow::set_ui_busy(bool busy) {
+void Window::set_ui_busy(bool busy) {
     calculate_button_->setEnabled(!busy);
     reset_button_->setEnabled(!busy);
     algo_choice_->setEnabled(!busy);
     //engine_choice_->setEnabled(!busy && algo_choice_->currentText() == "Gaussian Integral");
 }
 
-bool PiCalculatorWindow::is_worker_running() const {
+bool Window::is_worker_running() const {
     std::lock_guard<std::mutex> lock(worker_mutex_);
     return worker_running_;
 }
 
-void PiCalculatorWindow::join_worker_if_needed() {
+void Window::join_worker_if_needed() {
     if (worker_thread_.joinable()) {
         worker_thread_.join();
     }
 }
 
-void PiCalculatorWindow::worker_calculation(QString algorithm, QString engine) {
+void Window::worker_calculation(QString algorithm, QString engine) {
     WorkerMessage message;
 
     try {
@@ -252,7 +252,7 @@ void PiCalculatorWindow::worker_calculation(QString algorithm, QString engine) {
     worker_running_ = false;
 }
 
-void PiCalculatorWindow::on_calculate_button_click() {
+void Window::on_calculate_button_click() {
     if (is_worker_running()) {
         show_warning("Attenzione", "Un calcolo è già in esecuzione.");
         return;
@@ -273,10 +273,10 @@ void PiCalculatorWindow::on_calculate_button_click() {
         worker_running_ = true;
     }
 
-    worker_thread_ = std::thread(&PiCalculatorWindow::worker_calculation, this, algorithm, engine);
+    worker_thread_ = std::thread(&Window::worker_calculation, this, algorithm, engine);
 }
 
-void PiCalculatorWindow::check_worker_result() {
+void Window::check_worker_result() {
     std::optional<WorkerMessage> message;
     {
         std::lock_guard<std::mutex> lock(worker_mutex_);
@@ -305,7 +305,7 @@ void PiCalculatorWindow::check_worker_result() {
     set_ui_busy(false);
 }
 
-void PiCalculatorWindow::on_reset_button_click() {
+void Window::on_reset_button_click() {
     if (is_worker_running()) {
         show_warning("Attenzione", "Attendi la fine del calcolo prima di fare reset.");
         return;
@@ -318,6 +318,6 @@ void PiCalculatorWindow::on_reset_button_click() {
     reset_ui();
 }
 
-void PiCalculatorWindow::on_algo_choice(const QString &text) {
+void Window::on_algo_choice(const QString &text) {
     engine_choice_->setDisabled(text == "F. Bellard");
 }
