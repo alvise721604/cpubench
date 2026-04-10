@@ -30,7 +30,7 @@ namespace {
     constexpr int FBELLARD_ITERATIONS_PARAL = 1000'000'000;
     constexpr int WALLIS_ITERATIONS = 100'000'000;
     constexpr int WALLIS_ITERATIONS_PARAL = 1000'000'000;
-    constexpr int MEMTEST_ITERATIONS = 100ULL;
+    constexpr int MEMTEST_ITERATIONS = 500ULL;
 
 } // namespace
 
@@ -210,16 +210,29 @@ void PiCalculatorWindow::worker_calculation(QString algorithm, QString engine) {
 
         //------------------------------------------------------------------
         if (algorithm == "MemTest") {
-            const std::size_t buffer_size = 5ull * 1024ull * 1024ull * 1024ull;
-            std::vector<char> buf(buffer_size);
-            mem::mem_test_init( buf );
-            auto t0 = clock_type::now();
-            mem::mem_test_write( buf, MEMTEST_ITERATIONS );
-            auto t1 = clock_type::now();
-            double write_seconds = seconds_between(t0, t1);
-            double total_written = static_cast<double>(buffer_size) * 10;
-            double write_gbs = total_written / write_seconds / 1e9;
-            result = write_gbs;
+            if(omp) {
+                const std::size_t buffer_size = 5ull * 1024ull * 1024ull * 1024ull;
+                std::vector<char> buf(buffer_size);
+                mem::mem_test_init( buf );
+                auto t0 = clock_type::now();
+                mem::mem_test_write_omp( buf, MEMTEST_ITERATIONS );
+                auto t1 = clock_type::now();
+                double write_seconds = seconds_between(t0, t1);
+                double total_written = static_cast<double>(buffer_size) * MEMTEST_ITERATIONS;
+                double write_gbs = total_written / write_seconds / 1e9;
+                result = write_gbs;
+            } else {
+                const std::size_t buffer_size = 5ull * 1024ull * 1024ull * 1024ull;
+                std::vector<char> buf(buffer_size);
+                mem::mem_test_init( buf );
+                auto t0 = clock_type::now();
+                mem::mem_test_write( buf, MEMTEST_ITERATIONS );
+                auto t1 = clock_type::now();
+                double write_seconds = seconds_between(t0, t1);
+                double total_written = static_cast<double>(buffer_size) * MEMTEST_ITERATIONS;
+                double write_gbs = total_written / write_seconds / 1e9;
+                result = write_gbs;
+            }
         }
         
         const auto end_time = std::chrono::steady_clock::now();
