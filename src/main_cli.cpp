@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
                 std::cerr << "Error: cannot determine system RAM. Stop!";
                 std::exit(1);
             }
-            const std::size_t buffer_size = 5ull * 1024ull * 1024ull * 1024ull;
+            //const std::size_t buffer_size = 5ull * 1024ull * 1024ull * 1024ull;
             std::vector<char> buf(buffer_size);
 
             mem::mem_test_init(buf);
