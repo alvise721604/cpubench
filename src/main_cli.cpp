@@ -143,7 +143,7 @@ int main(int argc, char* argv[]) {
             //const std::size_t buffer_size = 5ull * 1024ull * 1024ull * 1024ull;
             std::vector<char> buf(buffer_size);
 
-            mem::mem_test_init(buf);
+            //mem::mem_test_init(buf);
             
             long iter = std::atol(opt.memiter.c_str());
             if ( iter < 100 ) {
@@ -151,6 +151,8 @@ int main(int argc, char* argv[]) {
                 iter = 100;
             }
             std::cout << "Info: Using " << (memutil::get_installed_ram_bytes() * 0.2) / (1024*1024*1024) << " GiB for memory test - " << iter << " iterations" << std::endl << std::flush;
+            std::cout << "Memory warm up..."  << std::endl << std::flush;
+            mem::mem_test_init(buf);
             const auto t0 = clock_type::now();
             if (omp) {
                 mem::mem_test_write_omp(buf, iter );
