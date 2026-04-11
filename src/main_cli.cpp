@@ -143,12 +143,18 @@ int main(int argc, char* argv[]) {
             std::vector<char> buf(buffer_size);
 
             mem::mem_test_init(buf);
+            
+            long iter = std::atol(opt.memiter.c_str());
+            if ( iter < 100 ) {
+                std::cout << "Warning: less than 100 memory write iteration specified. Reset to 100 as cache effects could affect result" << std::endl;
+                iter = 100;
+            }
+            std::cout << "Info: Using " << (memutil::get_installed_ram_bytes() * 0.2) / (1024**3) << " GiB for memory test" << std::endl;
             const auto t0 = clock_type::now();
-
             if (omp) {
-                mem::mem_test_write_omp(buf, std::atol(opt.memiter.c_str()) );
+                mem::mem_test_write_omp(buf, iter );
             } else {
-                mem::mem_test_write(buf, std::atol(opt.memiter.c_str()) );
+                mem::mem_test_write(buf, iter );
             }
 
             const auto t1 = clock_type::now();
