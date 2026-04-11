@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
         const auto start_time = clock_type::now();
 
         if (opt.test == "mem") {
-            const std::size_t buffer_size = memutil::get_installed_ram_bytes() * MEM_FRACTION_FOR_TEST;
+            const std::size_t buffer_size = (int)((float)memutil::get_installed_ram_bytes() * MEM_FRACTION_FOR_TEST);
             if ( buffer_size == 0 ) {
                 std::cerr << "Error: cannot determine system RAM. Stop!" << std::endl << std::flush;
                 std::exit(1);
