@@ -161,7 +161,7 @@ int main(int argc, char* argv[]) {
             //const std::size_t buffer_size =
             //    std::min(requested_buffer_size, max_buffer_size);
         
-            if (buffer_size == 0) {
+            if (requested_buffer_size == 0) {
                 std::cerr << "Error: computed buffer size is zero. Stop!" << std::endl;
                 return 1;
             }
@@ -199,7 +199,7 @@ int main(int argc, char* argv[]) {
             const auto t1 = clock_type::now();
 
             const double write_seconds = seconds_between(t0, t1);
-            const double total_written = static_cast<double>(buffer_size) * static_cast<double>(iter);
+            const double total_written = static_cast<double>(requested_buffer_size) * static_cast<double>(iter);
             result = total_written / write_seconds / 1e9;
         
             std::cout << "Test: mem\n";
