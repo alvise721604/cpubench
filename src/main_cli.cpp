@@ -158,8 +158,8 @@ int main(int argc, char* argv[]) {
             // Tetto massimo prudenziale per evitare allocazioni eccessive.
             // Per i primi test puoi tenerti su 512 MiB, 1 GiB o 2 GiB.
             const std::size_t max_buffer_size = 1ull * 1024ull * 1024ull * 1024ull; // 1 GiB
-            const std::size_t buffer_size =
-                std::min(requested_buffer_size, max_buffer_size);
+            //const std::size_t buffer_size =
+            //    std::min(requested_buffer_size, max_buffer_size);
         
             if (buffer_size == 0) {
                 std::cerr << "Error: computed buffer size is zero. Stop!" << std::endl;
@@ -172,16 +172,17 @@ int main(int argc, char* argv[]) {
             std::cout << "Info: Requested buffer: "
                       << (static_cast<double>(requested_buffer_size) / (1024.0 * 1024.0 * 1024.0))
                       << " GiB" << std::endl;
-            std::cout << "Info: Actual buffer used: "
-                      << (static_cast<double>(buffer_size) / (1024.0 * 1024.0 * 1024.0))
-                      << " GiB - " << iter << " iterations" << std::endl;
+            //std::cout << "Info: Actual buffer used: "
+            //          << (static_cast<double>(buffer_size) / (1024.0 * 1024.0 * 1024.0))
+            //          << " GiB - " << iter << " iterations" << std::endl;
 
             std::vector<char> buf;
             try {
-                buf.resize(buffer_size);
+                //buf.resize(buffer_size);
+                buf.resize(requested_buffer_size);
             } catch (const std::bad_alloc&) {
                 std::cerr << "Error: memory allocation failed for "
-                          << (static_cast<double>(buffer_size) / (1024.0 * 1024.0 * 1024.0))
+                          << (static_cast<double>(requested_buffer_size) / (1024.0 * 1024.0 * 1024.0))
                           << " GiB buffer" << std::endl;
                 return 3;
             }
@@ -203,8 +204,8 @@ int main(int argc, char* argv[]) {
         
             std::cout << "Test: mem\n";
             std::cout << "Engine: " << opt.engine << "\n";
-            std::cout << "Write bandwidth [GB/s]: "
-                      << std::fixed << std::setprecision(8) << result << "\n";
+            std::cout << "Write bandwidth [GiB/s]: "
+                      << std::fixed << std::setprecision(1) << result << "\n";
         }
         /*
         if (opt.test == "mem") {
