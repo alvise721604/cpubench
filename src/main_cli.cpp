@@ -1,46 +1,34 @@
 #include "calc.h"
-//#include "mem.h"
-//#include "memutil.h"
 
 #include <cstdlib>
 #include <chrono>
-#include <cstring>
 #include <exception>
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include <vector>
 
 namespace {
 
 using clock_type = std::chrono::steady_clock;
 
-constexpr std::size_t LEIBNIZ_ITERATIONS_PARAL = 8000'000'000ULL;
 constexpr std::size_t LEIBNIZ_ITERATIONS = 8000'000'000ULL;
-constexpr std::size_t EULER_ITERATIONS = 8000'000'000ULL;
-constexpr std::size_t EULER_ITERATIONS_PARAL = 8000'000'000ULL;
-constexpr double RIEMANN_GAUSS_LIMIT = 1000.0;
-constexpr double RIEMANN_STEP = 1e-07;
-constexpr int FBELLARD_ITERATIONS = 100'000'000;
-//constexpr int WALLIS_ITERATIONS = 100'000'000;
-//constexpr int WALLIS_ITERATIONS_PARAL = 1000'000'000;
-//const     std::string MEMTEST_ITERATIONS = "500";
-//const     float MEM_FRACTION_FOR_TEST = 0.25;
-
-double seconds_between(clock_type::time_point a, clock_type::time_point b) {
-    return std::chrono::duration<double>(b - a).count();
-}
+constexpr std::size_t EULER_ITERATIONS   = 8000'000'000ULL;
+constexpr double      RIEMANN_GAUSS_LIMIT = 1000.0;
+constexpr double      RIEMANN_STEP        = 1e-07;
+constexpr int         FBELLARD_ITERATIONS = 100'000'000;
 
 void print_usage(const char* progname) {
     std::cerr
         << "Uso:\n"
-        << "  " << progname << " --test cpu --algo leibniz --engine single\n"
-        << "  " << progname << " --test mem --engine multi\n\n"
+        << "  " << progname << " --algo leibniz\n"
+        << "  " << progname << " --algo euler --multicore\n"
+        << "  " << progname << " --algo bellard --iter 50000000\n"
+        << "  " << progname << " --algo gaussian --multicore\n\n"
         << "Argomenti:\n"
-        << "  --test    cpu | mem\n"
-        << "  --algo    leibniz | euler | bellard | gaussian (solo per --test cpu)\n"
-        << "  --engine  single | multi\n";
+        << "  --algo       leibniz | euler | bellard | gaussian\n"
+        << "  --multicore  abilita OpenMP\n"
+        << "  --iter       numero iterazioni (usato da leibniz, euler, bellard)\n";
 }
 
 std::string to_lower(std::string s) {
@@ -53,10 +41,9 @@ std::string to_lower(std::string s) {
 }
 
 struct Options {
-    std::string test;
     std::string algo;
-    std::string engine;
-    std::string memiter;
+    bool multicore = false;
+    std::string iter;
 };
 
 Options parse_args(int argc, char* argv[]) {
@@ -72,14 +59,12 @@ Options parse_args(int argc, char* argv[]) {
             return to_lower(argv[++i]);
         };
 
-        if (key == "--test") {
-            opt.test = require_value("--test");
-        } else if (key == "--algo") {
+        if (key == "--algo") {
             opt.algo = require_value("--algo");
-        } else if (key == "--engine") {
-            opt.engine = require_value("--engine");
-        } else if (key == "--memiter") {
-            opt.memiter = require_value("--memiter");
+        } else if (key == "--iter") {
+            opt.iter = require_value("--iter");
+        } else if (key == "--multicore") {
+            opt.multicore = true;
         } else if (key == "--help" || key == "-h") {
             print_usage(argv[0]);
             std::exit(0);
@@ -88,38 +73,60 @@ Options parse_args(int argc, char* argv[]) {
         }
     }
 
-    if (opt.test.empty()) {
-        throw std::invalid_argument("Devi specificare --test cpu oppure --test mem");
-    }
-    if (opt.engine.empty()) {
-        throw std::invalid_argument("Devi specificare --engine single oppure --engine multi");
+    if (opt.algo.empty()) {
+        throw std::invalid_argument("Devi specificare --algo");
     }
 
-    if (opt.test != "cpu" && opt.test != "mem") {
-        throw std::invalid_argument("Valore non valido per --test: " + opt.test);
-    }
-    if (opt.engine != "single" && opt.engine != "multi") {
-        throw std::invalid_argument("Valore non valido per --engine: " + opt.engine);
-    }
-
-    //if ( opt.memiter.empty() ) 
-    //    opt.memiter = MEMTEST_ITERATIONS;
-    
-    if (opt.test == "cpu") {
-        if (opt.algo.empty()) {
-            throw std::invalid_argument("Per --test cpu devi specificare anche --algo");
-        }
-        if (opt.algo != "leibniz" &&
-            opt.algo != "euler" &&
-            opt.algo != "bellard" &&
-            opt.algo != "gaussian") {
-            throw std::invalid_argument("Valore non valido per --algo: " + opt.algo);
-        }
-    } else {
-        opt.algo.clear();
+    if (opt.algo != "leibniz" &&
+        opt.algo != "euler" &&
+        opt.algo != "bellard" &&
+        opt.algo != "gaussian") {
+        throw std::invalid_argument("Valore non valido per --algo: " + opt.algo);
     }
 
     return opt;
+}
+
+std::size_t parse_size_t_or_throw(const std::string& s, const char* name) {
+    if (s.empty()) {
+        throw std::invalid_argument(std::string("Valore vuoto per ") + name);
+    }
+
+    std::size_t pos = 0;
+    unsigned long long value = 0;
+
+    try {
+        value = std::stoull(s, &pos, 10);
+    } catch (...) {
+        throw std::invalid_argument(std::string("Valore non valido per ") + name + ": " + s);
+    }
+
+    if (pos != s.size()) {
+        throw std::invalid_argument(std::string("Valore non valido per ") + name + ": " + s);
+    }
+
+    return static_cast<std::size_t>(value);
+}
+
+int parse_int_or_throw(const std::string& s, const char* name) {
+    if (s.empty()) {
+        throw std::invalid_argument(std::string("Valore vuoto per ") + name);
+    }
+
+    std::size_t pos = 0;
+    long value = 0;
+
+    try {
+        value = std::stol(s, &pos, 10);
+    } catch (...) {
+        throw std::invalid_argument(std::string("Valore non valido per ") + name + ": " + s);
+    }
+
+    if (pos != s.size() || value < 0) {
+        throw std::invalid_argument(std::string("Valore non valido per ") + name + ": " + s);
+    }
+
+    return static_cast<int>(value);
 }
 
 } // namespace
@@ -129,34 +136,58 @@ int main(int argc, char* argv[]) {
         const Options opt = parse_args(argc, argv);
 
         double result = 0.0;
-        const bool omp = (opt.engine == "multi");
 
         const auto start_time = clock_type::now();
 
         if (opt.algo == "leibniz") {
-            result = omp ? calc::pi_leibniz_omp(LEIBNIZ_ITERATIONS_PARAL)
-                         : calc::pi_leibniz(LEIBNIZ_ITERATIONS);
+            const std::size_t iterations =
+                opt.iter.empty() ? LEIBNIZ_ITERATIONS : parse_size_t_or_throw(opt.iter, "--iter");
+
+            result = opt.multicore
+                ? calc::pi_leibniz_omp(iterations)
+                : calc::pi_leibniz(iterations);
+
         } else if (opt.algo == "euler") {
-            result = omp ? calc::pi_euler_omp(EULER_ITERATIONS_PARAL)
-                         : calc::pi_euler(EULER_ITERATIONS);
+            const std::size_t iterations =
+                opt.iter.empty() ? EULER_ITERATIONS : parse_size_t_or_throw(opt.iter, "--iter");
+
+            result = opt.multicore
+                ? calc::pi_euler_omp(iterations)
+                : calc::pi_euler(iterations);
+
         } else if (opt.algo == "bellard") {
-            if (omp) {
+            const int iterations =
+                opt.iter.empty() ? FBELLARD_ITERATIONS : parse_int_or_throw(opt.iter, "--iter");
+
+            if (opt.multicore) {
                 std::cerr << "Nota: bellard usa comunque l'implementazione non-OMP disponibile nel progetto.\n";
             }
-            result = calc::pi_fabrice_bellard(FBELLARD_ITERATIONS);
+
+            result = calc::pi_fabrice_bellard(iterations);
+
         } else if (opt.algo == "gaussian") {
+            if (!opt.iter.empty()) {
+                std::cerr << "Nota: --iter viene ignorato per gaussian.\n";
+            }
+
             const auto iterations = static_cast<std::size_t>(RIEMANN_GAUSS_LIMIT / RIEMANN_STEP);
-            result = omp ? calc::gaussian_integral_omp(iterations, RIEMANN_STEP)
-                         : calc::gaussian_integral(iterations, RIEMANN_STEP);
+
+            result = opt.multicore
+                ? calc::gaussian_integral_omp(iterations, RIEMANN_STEP)
+                : calc::gaussian_integral(iterations, RIEMANN_STEP);
+
         } else {
             throw std::invalid_argument("Algoritmo non supportato: " + opt.algo);
         }
 
         std::cout << "Test: cpu\n";
         std::cout << "Algorithm: " << opt.algo << "\n";
-        std::cout << "Engine: " << opt.engine << "\n";
+        std::cout << "Multicore: " << (opt.multicore ? "yes" : "no") << "\n";
+        if (!opt.iter.empty()) {
+            std::cout << "Iterations override: " << opt.iter << "\n";
+        }
         std::cout << "Result: " << std::fixed << std::setprecision(8) << result << "\n";
-    
+
         const auto end_time = clock_type::now();
         const double duration = std::chrono::duration<double>(end_time - start_time).count();
 
@@ -167,6 +198,7 @@ int main(int argc, char* argv[]) {
         }
 
         return 0;
+
     } catch (const std::exception& e) {
         std::cerr << "Errore: " << e.what() << "\n\n";
         print_usage(argv[0]);
