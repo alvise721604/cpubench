@@ -149,7 +149,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "Warning: less than 100 memory write iteration specified. Reset to 100 as cache effects could affect result" << std::endl << std::flush;
                 iter = 100;
             }
-            std::cout << "Info: Using " << (memutil::get_installed_ram_bytes() * 0.2) / (1024*1024*1024) << " GiB for memory test" << std::endl << std::flush;
+            std::cout << "Info: Using " << (memutil::get_installed_ram_bytes() * 0.2) / (1024*1024*1024) << " GiB for memory test - " << iter << " iterations" << std::endl << std::flush;
             const auto t0 = clock_type::now();
             if (omp) {
                 mem::mem_test_write_omp(buf, iter );
