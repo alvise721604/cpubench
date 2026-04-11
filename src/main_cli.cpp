@@ -153,7 +153,7 @@ int main(int argc, char* argv[]) {
 
             const auto t1 = clock_type::now();
             const double write_seconds = seconds_between(t0, t1);
-            const double total_written = static_cast<double>(buffer_size) * MEMTEST_ITERATIONS;
+            const double total_written = static_cast<double>(buffer_size) * std::atol(opt.memiter.c_str());
             result = total_written / write_seconds / 1e9;
 
             std::cout << "Test: mem\n";
