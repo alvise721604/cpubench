@@ -259,9 +259,6 @@ int main(int argc, char* argv[]) {
                 const auto iterations = static_cast<std::size_t>(RIEMANN_GAUSS_LIMIT / RIEMANN_STEP);
                 result = omp ? calc::gaussian_integral_omp(iterations, RIEMANN_STEP)
                              : calc::gaussian_integral(iterations, RIEMANN_STEP);
-            } else if (opt.algo == "wallis") {
-                result = omp ? calc::wallis_omp(WALLIS_ITERATIONS_PARAL)
-                             : calc::wallis(WALLIS_ITERATIONS);
             } else {
                 throw std::invalid_argument("Algoritmo non supportato: " + opt.algo);
             }
