@@ -136,7 +136,7 @@ int main(int argc, char* argv[]) {
         if (opt.test == "mem") {
             const std::size_t buffer_size = memutil::get_installed_ram_bytes() * 0.2;
             if ( buffer_size == 0 ) {
-                std::cerr << "Error: cannot determine system RAM. Stop!";
+                std::cerr << "Error: cannot determine system RAM. Stop!" << std::endl << std::flush;
                 std::exit(1);
             }
             //const std::size_t buffer_size = 5ull * 1024ull * 1024ull * 1024ull;
@@ -146,10 +146,10 @@ int main(int argc, char* argv[]) {
             
             long iter = std::atol(opt.memiter.c_str());
             if ( iter < 100 ) {
-                std::cout << "Warning: less than 100 memory write iteration specified. Reset to 100 as cache effects could affect result" << std::endl;
+                std::cout << "Warning: less than 100 memory write iteration specified. Reset to 100 as cache effects could affect result" << std::endl << std::flush;
                 iter = 100;
             }
-            std::cout << "Info: Using " << (memutil::get_installed_ram_bytes() * 0.2) / (1024**3) << " GiB for memory test" << std::endl;
+            std::cout << "Info: Using " << (memutil::get_installed_ram_bytes() * 0.2) / (1024**3) << " GiB for memory test" << std::endl << std::flush;
             const auto t0 = clock_type::now();
             if (omp) {
                 mem::mem_test_write_omp(buf, iter );
