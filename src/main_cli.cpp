@@ -25,7 +25,7 @@ constexpr double RIEMANN_STEP = 1e-07;
 constexpr int FBELLARD_ITERATIONS = 100'000'000;
 constexpr int WALLIS_ITERATIONS = 100'000'000;
 constexpr int WALLIS_ITERATIONS_PARAL = 1000'000'000;
-constexpr unsigned int MEMTEST_ITERATIONS = 500U;
+constexpr int MEMTEST_ITERATIONS = 500;
 
 double seconds_between(clock_type::time_point a, clock_type::time_point b) {
     return std::chrono::duration<double>(b - a).count();
