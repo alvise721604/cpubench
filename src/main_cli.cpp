@@ -54,6 +54,7 @@ struct Options {
     std::string test;
     std::string algo;
     std::string engine;
+    std::string memiter;
 };
 
 Options parse_args(int argc, char* argv[]) {
@@ -75,6 +76,8 @@ Options parse_args(int argc, char* argv[]) {
             opt.algo = require_value("--algo");
         } else if (key == "--engine") {
             opt.engine = require_value("--engine");
+        } else if (key == "--memiter") {
+            opt.memiter = require_value("--memiter");
         } else if (key == "--help" || key == "-h") {
             print_usage(argv[0]);
             std::exit(0);
@@ -97,6 +100,9 @@ Options parse_args(int argc, char* argv[]) {
         throw std::invalid_argument("Valore non valido per --engine: " + opt.engine);
     }
 
+    if ( opt.memiter.empty() ) 
+        opt.memiter = MEMTEST_ITERATIONS;
+    
     if (opt.test == "cpu") {
         if (opt.algo.empty()) {
             throw std::invalid_argument("Per --test cpu devi specificare anche --algo");
@@ -139,9 +145,9 @@ int main(int argc, char* argv[]) {
             const auto t0 = clock_type::now();
 
             if (omp) {
-                mem::mem_test_write_omp(buf, MEMTEST_ITERATIONS);
+                mem::mem_test_write_omp(buf, std::atoul(opt.memiter) );
             } else {
-                mem::mem_test_write(buf, MEMTEST_ITERATIONS);
+                mem::mem_test_write(buf, std::atoul(opt.memiter) );
             }
 
             const auto t1 = clock_type::now();
