@@ -26,6 +26,7 @@ constexpr int FBELLARD_ITERATIONS = 100'000'000;
 constexpr int WALLIS_ITERATIONS = 100'000'000;
 constexpr int WALLIS_ITERATIONS_PARAL = 1000'000'000;
 const     std::string MEMTEST_ITERATIONS = "500";
+const     float MEM_FRACTION_FOR_TEST = 0.25;
 
 double seconds_between(clock_type::time_point a, clock_type::time_point b) {
     return std::chrono::duration<double>(b - a).count();
@@ -134,7 +135,7 @@ int main(int argc, char* argv[]) {
         const auto start_time = clock_type::now();
 
         if (opt.test == "mem") {
-            const std::size_t buffer_size = memutil::get_installed_ram_bytes() * 0.2;
+            const std::size_t buffer_size = memutil::get_installed_ram_bytes() * MEM_FRACTION_FOR_TEST;
             if ( buffer_size == 0 ) {
                 std::cerr << "Error: cannot determine system RAM. Stop!" << std::endl << std::flush;
                 std::exit(1);
