@@ -1,3 +1,5 @@
+#include <cstdint>
+
 namespace memutil {
   std::uint64_t get_installed_ram_bytes();
 }
