@@ -102,8 +102,8 @@ Options parse_args(int argc, char* argv[]) {
         throw std::invalid_argument("Valore non valido per --engine: " + opt.engine);
     }
 
-    if ( opt.memiter.empty() ) 
-        opt.memiter = MEMTEST_ITERATIONS;
+    //if ( opt.memiter.empty() ) 
+    //    opt.memiter = MEMTEST_ITERATIONS;
     
     if (opt.test == "cpu") {
         if (opt.algo.empty()) {
@@ -112,7 +112,7 @@ Options parse_args(int argc, char* argv[]) {
         if (opt.algo != "leibniz" &&
             opt.algo != "euler" &&
             opt.algo != "bellard" &&
-            opt.algo != "gaussian" {
+            opt.algo != "gaussian") {
             throw std::invalid_argument("Valore non valido per --algo: " + opt.algo);
         }
     } else {
