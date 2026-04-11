@@ -1,6 +1,6 @@
 #include "calc.h"
-#include "mem.h"
-#include "memutil.h"
+//#include "mem.h"
+//#include "memutil.h"
 
 #include <cstdlib>
 #include <chrono>
@@ -23,10 +23,10 @@ constexpr std::size_t EULER_ITERATIONS_PARAL = 8000'000'000ULL;
 constexpr double RIEMANN_GAUSS_LIMIT = 1000.0;
 constexpr double RIEMANN_STEP = 1e-07;
 constexpr int FBELLARD_ITERATIONS = 100'000'000;
-constexpr int WALLIS_ITERATIONS = 100'000'000;
-constexpr int WALLIS_ITERATIONS_PARAL = 1000'000'000;
-const     std::string MEMTEST_ITERATIONS = "500";
-const     float MEM_FRACTION_FOR_TEST = 0.25;
+//constexpr int WALLIS_ITERATIONS = 100'000'000;
+//constexpr int WALLIS_ITERATIONS_PARAL = 1000'000'000;
+//const     std::string MEMTEST_ITERATIONS = "500";
+//const     float MEM_FRACTION_FOR_TEST = 0.25;
 
 double seconds_between(clock_type::time_point a, clock_type::time_point b) {
     return std::chrono::duration<double>(b - a).count();
@@ -39,7 +39,7 @@ void print_usage(const char* progname) {
         << "  " << progname << " --test mem --engine multi\n\n"
         << "Argomenti:\n"
         << "  --test    cpu | mem\n"
-        << "  --algo    leibniz | euler | bellard | gaussian | wallis   (solo per --test cpu)\n"
+        << "  --algo    leibniz | euler | bellard | gaussian (solo per --test cpu)\n"
         << "  --engine  single | multi\n";
 }
 
@@ -112,8 +112,7 @@ Options parse_args(int argc, char* argv[]) {
         if (opt.algo != "leibniz" &&
             opt.algo != "euler" &&
             opt.algo != "bellard" &&
-            opt.algo != "gaussian" &&
-            opt.algo != "wallis") {
+            opt.algo != "gaussian" {
             throw std::invalid_argument("Valore non valido per --algo: " + opt.algo);
         }
     } else {
@@ -134,6 +133,7 @@ int main(int argc, char* argv[]) {
 
         const auto start_time = clock_type::now();
 
+        /*
         if (opt.test == "mem") {
             const std::uint64_t installed_ram = memutil::get_installed_ram_bytes();
             if (installed_ram == 0) {
@@ -243,7 +243,7 @@ int main(int argc, char* argv[]) {
             std::cout << "Test: mem\n";
             std::cout << "Engine: " << opt.engine << "\n";
             std::cout << "Write bandwidth [GB/s]: " << std::fixed << std::setprecision(8) << result << "\n";
-        }*/ else {
+        } else {*/
             if (opt.algo == "leibniz") {
                 result = omp ? calc::pi_leibniz_omp(LEIBNIZ_ITERATIONS_PARAL)
                              : calc::pi_leibniz(LEIBNIZ_ITERATIONS);
