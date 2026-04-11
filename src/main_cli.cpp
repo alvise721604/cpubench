@@ -102,7 +102,7 @@ Options parse_args(int argc, char* argv[]) {
     }
 
     if ( opt.memiter.empty() ) 
-        opt.memiter = MEMTEST_ITERATIONS;
+        opt.memiter = std::string(MEMTEST_ITERATIONS);
     
     if (opt.test == "cpu") {
         if (opt.algo.empty()) {
