@@ -133,142 +133,30 @@ int main(int argc, char* argv[]) {
 
         const auto start_time = clock_type::now();
 
-        /*
-        if (opt.test == "mem") {
-            const std::uint64_t installed_ram = memutil::get_installed_ram_bytes();
-            if (installed_ram == 0) {
-                std::cerr << "Error: cannot determine system RAM. Stop!" << std::endl;
-                return 1;
-            }
-
-            long iter = std::atol(opt.memiter.c_str());
-            if (iter < 100) {
-                std::cout << "Warning: less than 100 memory write iteration specified. "
-                             "Reset to 100 as cache effects could affect result"
-                          << std::endl;
-                iter = 100;
-            }
-
-            const double fraction = static_cast<double>(MEM_FRACTION_FOR_TEST);
-        
-            // Calcolo corretto: niente float, niente int intermedio.
-            std::size_t requested_buffer_size =
-                static_cast<std::size_t>(static_cast<double>(installed_ram) * fraction);
-        
-            // Tetto massimo prudenziale per evitare allocazioni eccessive.
-            // Per i primi test puoi tenerti su 512 MiB, 1 GiB o 2 GiB.
-            const std::size_t max_buffer_size = 1ull * 1024ull * 1024ull * 1024ull; // 1 GiB
-            //const std::size_t buffer_size =
-            //    std::min(requested_buffer_size, max_buffer_size);
-        
-            if (requested_buffer_size == 0) {
-                std::cerr << "Error: computed buffer size is zero. Stop!" << std::endl;
-                return 1;
-            }
-
-            std::cout << "Info: Installed RAM: "
-                      << (static_cast<double>(installed_ram) / (1024.0 * 1024.0 * 1024.0))
-                      << " GiB" << std::endl;
-            std::cout << "Info: Requested buffer: "
-                      << (static_cast<double>(requested_buffer_size) / (1024.0 * 1024.0 * 1024.0))
-                      << " GiB" << std::endl;
-            //std::cout << "Info: Actual buffer used: "
-            //          << (static_cast<double>(buffer_size) / (1024.0 * 1024.0 * 1024.0))
-            //          << " GiB - " << iter << " iterations" << std::endl;
-
-            std::vector<char> buf;
-            try {
-                //buf.resize(buffer_size);
-                buf.resize(requested_buffer_size);
-            } catch (const std::bad_alloc&) {
-                std::cerr << "Error: memory allocation failed for "
-                          << (static_cast<double>(requested_buffer_size) / (1024.0 * 1024.0 * 1024.0))
-                          << " GiB buffer" << std::endl;
-                return 3;
-            }
-
-            std::cout << "Memory warm up..." << std::endl;
-            mem::mem_test_init(buf);
-        
-            const auto t0 = clock_type::now();
+        if (opt.algo == "leibniz") {
+            result = omp ? calc::pi_leibniz_omp(LEIBNIZ_ITERATIONS_PARAL)
+                         : calc::pi_leibniz(LEIBNIZ_ITERATIONS);
+        } else if (opt.algo == "euler") {
+            result = omp ? calc::pi_euler_omp(EULER_ITERATIONS_PARAL)
+                         : calc::pi_euler(EULER_ITERATIONS);
+        } else if (opt.algo == "bellard") {
             if (omp) {
-                mem::mem_test_write_omp(buf, static_cast<unsigned int>(iter));
-            } else {
-                mem::mem_test_write(buf, static_cast<unsigned int>(iter));
+                std::cerr << "Nota: bellard usa comunque l'implementazione non-OMP disponibile nel progetto.\n";
             }
-            const auto t1 = clock_type::now();
-
-            const double write_seconds = seconds_between(t0, t1);
-            const double total_written = static_cast<double>(requested_buffer_size) * static_cast<double>(iter);
-            result = total_written / write_seconds / 1e9;
-        
-            std::cout << "Test: mem\n";
-            std::cout << "Engine: " << opt.engine << "\n";
-            std::cout << "Write bandwidth [GiB/s]: "
-                      << std::fixed << std::setprecision(1) << result << "\n";
-        }
-        /*
-        if (opt.test == "mem") {
-            const std::size_t buffer_size = (int)((float)memutil::get_installed_ram_bytes() * MEM_FRACTION_FOR_TEST);
-            
-            if ( buffer_size == 0 ) {
-                std::cerr << "Error: cannot determine system RAM. Stop!" << std::endl << std::flush;
-                std::exit(1);
-            }
-            //const std::size_t buffer_size = 5ull * 1024ull * 1024ull * 1024ull;
-            std::vector<char> buf(buffer_size);
-
-            //mem::mem_test_init(buf);
-            
-            long iter = std::atol(opt.memiter.c_str());
-            if ( iter < 100 ) {
-                std::cout << "Warning: less than 100 memory write iteration specified. Reset to 100 as cache effects could affect result" << std::endl << std::flush;
-                iter = 100;
-            }
-            std::cout << "Info: Using " << (memutil::get_installed_ram_bytes() * 0.2) / (1024*1024*1024) << " GiB for memory test - " << iter << " iterations" << std::endl << std::flush;
-            std::cout << "Memory warm up..."  << std::endl << std::flush;
-            mem::mem_test_init(buf);
-            const auto t0 = clock_type::now();
-            if (omp) {
-                mem::mem_test_write_omp(buf, iter );
-            } else {
-                mem::mem_test_write(buf, iter );
-            }
-
-            const auto t1 = clock_type::now();
-            const double write_seconds = seconds_between(t0, t1);
-            const double total_written = static_cast<double>(buffer_size) * std::atol(opt.memiter.c_str());
-            result = total_written / write_seconds / 1e9;
-
-            std::cout << "Test: mem\n";
-            std::cout << "Engine: " << opt.engine << "\n";
-            std::cout << "Write bandwidth [GB/s]: " << std::fixed << std::setprecision(8) << result << "\n";
-        } else {*/
-            if (opt.algo == "leibniz") {
-                result = omp ? calc::pi_leibniz_omp(LEIBNIZ_ITERATIONS_PARAL)
-                             : calc::pi_leibniz(LEIBNIZ_ITERATIONS);
-            } else if (opt.algo == "euler") {
-                result = omp ? calc::pi_euler_omp(EULER_ITERATIONS_PARAL)
-                             : calc::pi_euler(EULER_ITERATIONS);
-            } else if (opt.algo == "bellard") {
-                if (omp) {
-                    std::cerr << "Nota: bellard usa comunque l'implementazione non-OMP disponibile nel progetto.\n";
-                }
-                result = calc::pi_fabrice_bellard(FBELLARD_ITERATIONS);
-            } else if (opt.algo == "gaussian") {
-                const auto iterations = static_cast<std::size_t>(RIEMANN_GAUSS_LIMIT / RIEMANN_STEP);
-                result = omp ? calc::gaussian_integral_omp(iterations, RIEMANN_STEP)
-                             : calc::gaussian_integral(iterations, RIEMANN_STEP);
-            } else {
-                throw std::invalid_argument("Algoritmo non supportato: " + opt.algo);
-            }
-
-            std::cout << "Test: cpu\n";
-            std::cout << "Algorithm: " << opt.algo << "\n";
-            std::cout << "Engine: " << opt.engine << "\n";
-            std::cout << "Result: " << std::fixed << std::setprecision(8) << result << "\n";
+            result = calc::pi_fabrice_bellard(FBELLARD_ITERATIONS);
+        } else if (opt.algo == "gaussian") {
+            const auto iterations = static_cast<std::size_t>(RIEMANN_GAUSS_LIMIT / RIEMANN_STEP);
+            result = omp ? calc::gaussian_integral_omp(iterations, RIEMANN_STEP)
+                         : calc::gaussian_integral(iterations, RIEMANN_STEP);
+        } else {
+            throw std::invalid_argument("Algoritmo non supportato: " + opt.algo);
         }
 
+        std::cout << "Test: cpu\n";
+        std::cout << "Algorithm: " << opt.algo << "\n";
+        std::cout << "Engine: " << opt.engine << "\n";
+        std::cout << "Result: " << std::fixed << std::setprecision(8) << result << "\n";
+    
         const auto end_time = clock_type::now();
         const double duration = std::chrono::duration<double>(end_time - start_time).count();
 
