@@ -2,6 +2,7 @@
 #include "mem.h"
 #include "memutil.h"
 
+#include <cstdlib>
 #include <chrono>
 #include <cstring>
 #include <exception>
@@ -145,9 +146,9 @@ int main(int argc, char* argv[]) {
             const auto t0 = clock_type::now();
 
             if (omp) {
-                mem::mem_test_write_omp(buf, std::atoul(opt.memiter) );
+                mem::mem_test_write_omp(buf, std::atol(opt.memiter) );
             } else {
-                mem::mem_test_write(buf, std::atoul(opt.memiter) );
+                mem::mem_test_write(buf, std::atol(opt.memiter) );
             }
 
             const auto t1 = clock_type::now();
