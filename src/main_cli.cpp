@@ -15,20 +15,16 @@ using clock_type = std::chrono::steady_clock;
 constexpr std::size_t LEIBNIZ_ITERATIONS = 8000'000'000ULL;
 constexpr std::size_t EULER_ITERATIONS   = 8000'000'000ULL;
 constexpr double      RIEMANN_GAUSS_LIMIT = 1000.0;
-constexpr double      RIEMANN_STEP        = 1e-07;
-constexpr int         FBELLARD_ITERATIONS = 100'000'000;
+constexpr long double      RIEMANN_STEP        = 1e-07L;
+//constexpr int         FBELLARD_ITERATIONS = 100;
 
 void print_usage(const char* progname) {
     std::cerr
         << "Uso:\n"
-        << "  " << progname << " --algo leibniz\n"
-        << "  " << progname << " --algo euler --multicore\n"
-        << "  " << progname << " --algo bellard --iter 50000000\n"
-        << "  " << progname << " --algo gaussian --multicore\n\n"
-        << "Argomenti:\n"
-        << "  --algo       leibniz | euler | bellard | gaussian\n"
-        << "  --multicore  abilita OpenMP\n"
-        << "  --iter       numero iterazioni (usato da leibniz, euler, bellard)\n";
+        << "  " << progname << " --algo <algorithm> [--multicore] [--iter <iterations>>]\n"
+
+        << "Algorithm:\n"
+        << "  leibniz | euler | wallis | gaussian\n";
 }
 
 std::string to_lower(std::string s) {
@@ -79,7 +75,7 @@ Options parse_args(int argc, char* argv[]) {
 
     if (opt.algo != "leibniz" &&
         opt.algo != "euler" &&
-        opt.algo != "bellard" &&
+        opt.algo != "wallis" &&
         opt.algo != "gaussian") {
         throw std::invalid_argument("Valore non valido per --algo: " + opt.algo);
     }
@@ -155,15 +151,13 @@ int main(int argc, char* argv[]) {
                 ? calc::pi_euler_omp(iterations)
                 : calc::pi_euler(iterations);
 
-        } else if (opt.algo == "bellard") {
-            const int iterations =
-                opt.iter.empty() ? FBELLARD_ITERATIONS : parse_int_or_throw(opt.iter, "--iter");
+        } else if (opt.algo == "wallis") {
+            const std::size_t iterations =
+                opt.iter.empty() ? EULER_ITERATIONS : parse_size_t_or_throw(opt.iter, "--iter");
 
-            if (opt.multicore) {
-                std::cerr << "Nota: bellard usa comunque l'implementazione non-OMP disponibile nel progetto.\n";
-            }
-
-            result = calc::pi_fabrice_bellard(iterations);
+            result = opt.multicore
+                ? calc::pi_wallis_omp(iterations)
+                : calc::pi_wallis(iterations);
 
         } else if (opt.algo == "gaussian") {
             if (!opt.iter.empty()) {
