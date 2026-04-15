@@ -5,16 +5,18 @@
 
 namespace calc {
 
-double pi_fabrice_bellard(int iterations);
-double wallis( std::size_t iterations );
-double wallis_omp( std::size_t iterations );
-//double pi_fabrice_bellard_omp(int iterations);
-double pi_leibniz_omp(std::size_t iterations);
-double pi_leibniz(std::size_t iterations);
-double pi_leibniz_omp(std::size_t iterations);
-double pi_euler_omp(std::size_t iterations);
-double pi_euler(std::size_t iterations);
-double gaussian_integral(std::size_t iterations, double step);
-double gaussian_integral_omp(std::size_t iterations, double step);
+long double pi_wallis( const std::size_t iterations );
+long double pi_wallis_omp( const std::size_t iterations );
+
+long double pi_leibniz(const std::size_t iterations);
+long double pi_leibniz_omp(const std::size_t iterations);
+
+long double pi_euler(const std::size_t iterations);
+long double pi_euler_omp(const std::size_t iterations);
+
+long double gaussian_integral(const std::size_t iterations, const long double step);
+long double gaussian_integral_omp(const std::size_t iterations, const long double step);
+
+
 
 } // namespace calc
