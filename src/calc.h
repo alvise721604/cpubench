@@ -14,9 +14,9 @@ long double pi_leibniz_omp(const std::size_t iterations);
 long double pi_euler(const std::size_t iterations);
 long double pi_euler_omp(const std::size_t iterations);
 
-long double gaussian_integral(const std::size_t iterations, const long double step);
-long double gaussian_integral_omp(const std::size_t iterations, const long double step);
+long double gauss_integral(const std::size_t iterations, const long double step);
+long double gauss_integral_omp(const std::size_t iterations, const long double step);
 
-
+long double e_neper( const int iterations );
 
 } // namespace calc

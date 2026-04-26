@@ -12,11 +12,10 @@ namespace {
 
 using clock_type = std::chrono::steady_clock;
 
-constexpr std::size_t LEIBNIZ_ITERATIONS = 8000'000'000ULL;
-constexpr std::size_t EULER_ITERATIONS   = 8000'000'000ULL;
+constexpr std::size_t LEIBNIZ_ITERATIONS  = 8000'000'000ULL;
+constexpr std::size_t EULER_ITERATIONS    = 8000'000'000ULL;
 constexpr double      RIEMANN_GAUSS_LIMIT = 1000.0;
-constexpr long double      RIEMANN_STEP        = 1e-07L;
-//constexpr int         FBELLARD_ITERATIONS = 100;
+constexpr long double RIEMANN_STEP        = 1e-07L;
 
 void print_usage(const char* progname) {
     std::cerr
@@ -24,7 +23,7 @@ void print_usage(const char* progname) {
         << "  " << progname << " --algo <algorithm> [--multicore] [--iter <iterations>>]\n"
 
         << "Algorithm:\n"
-        << "  leibniz | euler | wallis | gaussian\n";
+        << "  leibniz | euler | wallis | gauss | neper \n";
 }
 
 std::string to_lower(std::string s) {
@@ -76,7 +75,8 @@ Options parse_args(int argc, char* argv[]) {
     if (opt.algo != "leibniz" &&
         opt.algo != "euler" &&
         opt.algo != "wallis" &&
-        opt.algo != "gaussian") {
+        opt.algo != "gauss" &&
+        opt.algo != "neper") {
         throw std::invalid_argument("Valore non valido per --algo: " + opt.algo);
     }
 
@@ -135,7 +135,12 @@ int main(int argc, char* argv[]) {
 
         const auto start_time = clock_type::now();
 
-        if (opt.algo == "leibniz") {
+        if (opt.algo == "neper") {
+            const std::size_t iterations = 
+                opt.iter.empty() ? 10000000 : parse_size_t_or_throw(opt.iter, "--iter");
+            result = calc::e_neper( iterations );
+
+        } else if (opt.algo == "leibniz") {
             const std::size_t iterations =
                 opt.iter.empty() ? LEIBNIZ_ITERATIONS : parse_size_t_or_throw(opt.iter, "--iter");
 
@@ -159,16 +164,16 @@ int main(int argc, char* argv[]) {
                 ? calc::pi_wallis_omp(iterations)
                 : calc::pi_wallis(iterations);
 
-        } else if (opt.algo == "gaussian") {
+        } else if (opt.algo == "gauss") {
             if (!opt.iter.empty()) {
-                std::cerr << "Nota: --iter viene ignorato per gaussian.\n";
+                std::cerr << "Nota: --iter viene ignorato per gauss.\n";
             }
 
             const auto iterations = static_cast<std::size_t>(RIEMANN_GAUSS_LIMIT / RIEMANN_STEP);
 
             result = opt.multicore
-                ? calc::gaussian_integral_omp(iterations, RIEMANN_STEP)
-                : calc::gaussian_integral(iterations, RIEMANN_STEP);
+                ? calc::gauss_integral_omp(iterations, RIEMANN_STEP)
+                : calc::gauss_integral(iterations, RIEMANN_STEP);
 
         } else {
             throw std::invalid_argument("Algoritmo non supportato: " + opt.algo);
